@@ -1,7 +1,7 @@
 
 import pandas as pd
 
-
+basedir='rsanc'
 import pandas as pd
 
 # Define the roles and their corresponding weights for each attribute
@@ -26,7 +26,7 @@ abbr_keys = [
 ]
 
 
-with open('rsana/all_attrs.txt', 'r') as file:
+with open(f'{basedir}/all_attrs.txt', 'r') as file:
   raw_data = file.readlines()
 
 columns = raw_data[0].strip().strip('|').split('|')
@@ -88,4 +88,4 @@ weighted_sums_df = calculate_weighted_sum_2(df_tmp, new_df,  weights)
 
 print(weighted_sums_df)
 
-weighted_sums_df.to_csv('data/wsums2.txt', index=False)
+weighted_sums_df.to_csv(f'{basedir}/wsums2.txt', index=False)

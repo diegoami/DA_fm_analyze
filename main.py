@@ -1,14 +1,13 @@
 import pandas as pd
 
-basedir = 'rsana'
+basedir = 'rsanc'
 
 
 def parse_df():
-    with open('{basedir}/all_attrs.txt', 'r') as file:
+    with open(f'{basedir}/all_attrs.txt', 'r') as file:
         raw_data = file.readlines()
     columns = raw_data[0].strip().strip('|').split('|')
     columns = [x.strip() for x in columns]
-    print(columns)
     # Clean the data
     cleaned_data = []
     for line in raw_data:
@@ -36,11 +35,9 @@ def create_octs(df):
     new_df['Technical'] = df[['Tec', 'Fir', 'Dri']].mean(axis=1)
     new_df['Aerial'] = df[['Jum', 'Hea']].mean(axis=1)
     new_df['Mental'] = df[['Dec', 'Tea', 'Ant', 'Bra', 'Det', 'Cnt']].mean(axis=1)
-    print(new_df)
     columns_to_round = ['Defending', 'Physical', 'Speed', 'Vision', 'Attacking', 'Technical', 'Aerial', 'Mental']
     new_df[columns_to_round] = new_df[columns_to_round].round(2)
-    print(new_df)
-    new_df.to_csv('{base_dir}/octs.txt', index=False)
+    new_df.to_csv(f'{basedir}/octs.txt', index=False)
     return new_df
 
 
@@ -55,30 +52,15 @@ def create_roles(df, player_roles, output_file):
         player_role_df[role] = df[attributes].mean(axis=1)
     # Round the values to two decimal places
     player_role_df = player_role_df.round(2)
-    print(player_role_df)
-    player_role_df = player_role_df.round(2)
 
-    player_role_df.to_csv('{base_dir}/middle.txt', index=False)
+    player_role_df.to_csv(f'{basedir}/{output_file}', index=False)
     return player_role_df
-
-player_role_df = df[['Player', 'UID']]
-
-# Create an empty DataFrame with the same number of rows as the original DataFrame
-
-# Calculate the average values for each player role
-for role, attributes in player_roles_att.items():
-    player_role_df[role] = df[attributes].mean(axis=1)
-
-# Round the values to two decimal places
-
-player_role_df.to_csv('data/attack.txt', index=False)
-
 
 if __name__ == '__main__':
     df = parse_df()
     new_df = create_octs(df)
 
-    player_roles_mf = {
+    player_roles_mc = {
         'DLP': ['Tec', 'Pas', 'Vis', 'Tec', 'Cmp', 'Ant', 'Dec', 'Pos', 'Tea', 'Cnt'],
         'Regista': ['Pas', 'Vis', 'Tec', 'Fir', 'Cro', 'Ant', 'Dec', 'OtB', 'Pos', 'Cnt'],
         'BWM': ['Tck', 'Agg', 'Wor', 'Sta', 'Pos', 'Tea', 'Str', 'Bra', 'Ant', 'Cnt'],
@@ -89,7 +71,7 @@ if __name__ == '__main__':
         'Carrilero': ['Wor', 'Sta', 'Pos', 'Tea', 'Ant', 'Tck', 'Dec', 'Fir', 'Pas', 'Cnt']
     }
 
-    player_roles_att = {
+    player_roles_st = {
         'AF': ['Acc', 'Pac', 'Fin', 'OtB', 'Ant', 'Cmp', 'Dri', 'Agi', 'Bal', 'Sta'],
         'CF': ['Fin', 'Fir', 'Hea', 'Pas', 'Tec', 'OtB', 'Ant', 'Vis', 'Wor', 'Str'],
         'DLF': ['Fir', 'Pas', 'Tec', 'Vis', 'OtB', 'Ant', 'Dec', 'Str', 'Bal', 'Cmp'],
@@ -99,5 +81,65 @@ if __name__ == '__main__':
         'TM': ['Hea', 'Str', 'Jum', 'Fir', 'Ant', 'Bal', 'OtB', 'Fin', 'Tea', 'Pas']
     }
 
-    create_roles(df, player_roles_mf, 'middle.txt')
-    create_roles(df, player_roles_att, 'attack.txt')
+    player_roles_dm = {
+        'DM' : ['Tck', 'Mar', 'Pos', 'Ant', 'Cnt', 'Sta', 'Wor', 'Tea', 'Str', 'Dec'],
+        'AM' : ['Tck', 'Mar', 'Pos', 'Ant', 'Cnt', 'Sta', 'Wor', 'Tea', 'Str', 'Tea'],
+        'BWM': ['Tck', 'Mar', 'Pos', 'Ant', 'Cnt', 'Sta', 'Wor', 'Tea', 'Str', 'Tea'],
+        'HB' : ['Tck', 'Agg', 'Wor', 'Sta', 'Pos', 'Tea', 'Str', 'Bra', 'Ant', 'Cnt'],
+        'SV' : ['Tck', 'Mar', 'Pos', 'Ant', 'Cnt', 'Sta', 'Wor', 'Fir', 'Pas', 'Cmp'],
+        'RGA' : ['Pas', 'Vis', 'Tec', 'Fir', 'Fla', 'Ant', 'Dec', 'OtB', 'Pos', 'Cnt']
+    }
+
+    player_roles_cd = {
+        'CD': ['Hea', 'Mar', 'Tck', 'Jum', 'Str', 'Pos', 'Ant', 'Cnt', 'Tea', 'Bra'],
+        'BPD': ['Hea', 'Mar', 'Tck', 'Jum', 'Str', 'Pos', 'Ant', 'Cnt', 'Fir', 'Pas'],
+        'NNCB': ['Hea', 'Mar', 'Tck', 'Jum', 'Str', 'Pos', 'Ant', 'Cnt', 'Bra', 'Agg'],
+        'Lib': ['Fir', 'Pas', 'Tec', 'Vis', 'Ant', 'Pos', 'Cnt', 'Tck', 'Mar', 'OtB']
+    }
+
+    player_roles_fb = {
+        'FB': ['Tck', 'Mar', 'Pos', 'Ant', 'Cnt', 'Sta', 'Wor', 'Tea', 'Acc', 'Pac'],
+        'WB': ['Tck', 'Mar', 'Pos', 'Sta', 'Wor', 'Cro', 'Acc', 'Pac', 'Dri', 'OtB'],
+        'IWB': ['Tck', 'Mar', 'Pos', 'Ant', 'Cnt', 'Sta', 'Wor', 'Fir', 'Pas', 'Vis'],
+        'CWB': ['Tck', 'Mar', 'Pos', 'Sta', 'Wor', 'Cro', 'Acc', 'Pac', 'Dri', 'OtB', 'Fir', 'Pas', 'Tec'],
+        'NNFB': ['Tck', 'Mar', 'Pos', 'Ant', 'Cnt', 'Sta', 'Wor', 'Bra', 'Agg', 'Str']
+    }
+
+    player_roles_wm = {
+        'WM': ['Cro', 'Dri', 'Fir', 'Pas', 'Tck', 'Wor', 'Tea', 'Sta', 'Dec', 'OtB'],
+        'W': ['Cro', 'Dri', 'Acc', 'Pac', 'Sta', 'Wor', 'Tea', 'OtB', 'Fla', 'Bal'],
+        'DW': ['Mar', 'Tck', 'Sta', 'Wor', 'Tea', 'Pos', 'Ant', 'Cnt', 'Cro', 'Pas'],
+        'IW': ['Dri', 'Fir', 'Pas', 'Vis', 'Tec', 'Sta', 'Wor', 'OtB', 'Ant', 'Dec'],
+        'IF': ['Dri', 'Fin', 'Fir', 'Pas', 'Tec', 'Sta', 'Wor', 'OtB', 'Ant', 'Dec'],
+        'WG': ['Cro', 'Dri', 'Acc', 'Pac', 'Sta', 'Wor', 'Tea', 'OtB', 'Fla', 'Bal', 'Hea', 'Jum']
+    }
+
+    player_roles_amc = {
+        'AMC': ['Fir', 'Pas', 'Tec', 'Vis', 'Dec', 'Wor', 'Sta', 'Tea', 'OtB', 'Cnt'],
+        'AP': ['Fir', 'Pas', 'Tec', 'Vis', 'Fla', 'Dec', 'Wor', 'Sta', 'Tea', 'OtB'],
+        'T': ['Fir', 'Pas', 'Tec', 'Vis', 'Dec', 'Wor', 'Sta', 'Tea', 'OtB', 'Cnt'],
+        'SS': ['Dri', 'Fin', 'Fir', 'Pas', 'Tec', 'Sta', 'Wor', 'OtB', 'Ant', 'Dec'],
+        'AM': ['Dri', 'Fir', 'Pas', 'Vis', 'Tec', 'Sta', 'Wor', 'OtB', 'Ant', 'Dec'],
+        'EG': ['Dri', 'Fir', 'Pas', 'Vis', 'Tec', 'Sta', 'Wor', 'OtB', 'Fla', 'Bal']
+    }
+
+    player_roles_amlr = {
+        'AML': ['Dri', 'Fir', 'Pas', 'Tec', 'Vis', 'Sta', 'Wor', 'OtB', 'Ant', 'Dec'],
+        'AMR': ['Dri', 'Fir', 'Pas', 'Tec', 'Vis', 'Sta', 'Wor', 'OtB', 'Ant', 'Dec'],
+        'IW_AML': ['Dri', 'Fir', 'Pas', 'Vis', 'Tec', 'Sta', 'Wor', 'OtB', 'Ant', 'Dec'],
+        'IW_AMR': ['Dri', 'Fir', 'Pas', 'Vis', 'Tec', 'Sta', 'Wor', 'OtB', 'Ant', 'Dec'],
+        'W_AML': ['Cro', 'Dri', 'Acc', 'Pac', 'Sta', 'Wor', 'Tea', 'OtB', 'Fla', 'Bal'],
+        'W_AMR': ['Cro', 'Dri', 'Acc', 'Pac', 'Sta', 'Wor', 'Tea', 'OtB', 'Fla', 'Bal'],
+        'IF_AML': ['Dri', 'Fin', 'Fir', 'Pas', 'Tec', 'Sta', 'Wor', 'OtB', 'Ant', 'Dec'],
+        'IF_AMR': ['Dri', 'Fin', 'Fir', 'Pas', 'Tec', 'Sta', 'Wor', 'OtB', 'Ant', 'Dec'],
+        'WG_AML': ['Cro', 'Dri', 'Acc', 'Pac', 'Sta', 'Wor', 'Tea', 'OtB', 'Fla', 'Bal', 'Hea', 'Jum'],
+        'WG_AMR': ['Cro', 'Dri', 'Acc', 'Pac', 'Sta', 'Wor', 'Tea', 'OtB', 'Fla', 'Bal', 'Hea', 'Jum']
+    }
+    create_roles(df, player_roles_mc, 'middle.txt')
+    create_roles(df, player_roles_st, 'attack.txt')
+    create_roles(df, player_roles_dm, 'dm.txt')
+    create_roles(df, player_roles_cd, 'cd.txt')
+    create_roles(df, player_roles_fb, 'fb.txt')
+    create_roles(df, player_roles_wm, 'wm.txt')
+    create_roles(df, player_roles_amc, 'amc.txt')
+    create_roles(df, player_roles_amlr, 'amlr.txt')
