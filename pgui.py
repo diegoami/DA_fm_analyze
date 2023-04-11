@@ -3,7 +3,7 @@
 from pandasgui import show
 import pandas
 
-base_dir = 'rsanc'
+base_dir = 'inter'
 octs_df =  pandas.read_csv(f'{base_dir}/octs.txt')
 wsums_df = pandas.read_csv(f'{base_dir}/wsums2.txt')
 middle_df = pandas.read_csv(f'{base_dir}/middle.txt')

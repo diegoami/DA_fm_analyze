@@ -1,6 +1,6 @@
 import pandas as pd
 
-basedir = 'rsanc'
+basedir = 'inter'
 
 
 def parse_df():

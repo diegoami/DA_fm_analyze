@@ -1,7 +1,7 @@
 
 import pandas as pd
 
-basedir='rsanc'
+basedir='inter'
 import pandas as pd
 
 # Define the roles and their corresponding weights for each attribute
