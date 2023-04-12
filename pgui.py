@@ -1,29 +1,33 @@
-
-
+import argparse
 from pandasgui import show
 import pandas
+import yaml
+import view_parse
 
-base_dir = 'inter'
-octs_df =  pandas.read_csv(f'{base_dir}/octs.txt')
-wsums_df = pandas.read_csv(f'{base_dir}/wsums2.txt')
-middle_df = pandas.read_csv(f'{base_dir}/middle.txt')
-att_df = pandas.read_csv(f'{base_dir}/attack.txt')
-dm_df = pandas.read_csv(f'{base_dir}/dm.txt')
-cd_df = pandas.read_csv(f'{base_dir}/cd.txt')
-fb_df = pandas.read_csv(f'{base_dir}/fb.txt')
-wm_df = pandas.read_csv(f'{base_dir}/wm.txt')
-amc_df = pandas.read_csv(f'{base_dir}/amc.txt')
-amlr_df = pandas.read_csv(f'{base_dir}/amlr.txt')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
 
+    parser.add_argument('--config')
+    args = parser.parse_args()
+    if args.config == None:
+        print("required argument --config <config>")
+        exit()
+    else:
+        with open(args.config, 'r') as confhandle:
+            config = yaml.safe_load(confhandle)
 
-# Display the DataFrame in PandasGUI
-dfs = {
-    "octs" : octs_df,
-    "wsums" : wsums_df,
-#    "attrs" : attrs_df,
-#    "middle" : middle_df,
-#    "att" : att_df
-}
+    basedir = config["basedir"]
+    formation = config["formation"]
+    all_csvs = ['all_attrs', 'octs', 'wsums', 'cd', 'fb', 'dm', 'cm', 'wm', 'amc', 'amlr', 'st']
+    all_dfs = {}
+    if formation:
+        formation_df = view_parse.parse_selection(basedir)
 
-#gui = show(octs_df)
-gui = show(octs_df, wsums_df, middle_df, att_df, dm_df, cd_df, fb_df, wm_df, amc_df, amlr_df)
+    for csv in all_csvs:
+        csv_df = pandas.read_csv(f'{basedir}/{csv}.csv')
+        if formation_df is not None:
+            csv_df = formation_df.merge(csv_df, on='UID', how='inner')
+        all_dfs[csv] = csv_df
+
+    #all_dfs = { all_csv : pandas.read_csv(f'{basedir}/{all_csv}.csv') for all_csv in all_csvs}
+    gui = show(**all_dfs)
