@@ -4,9 +4,10 @@ import os
 
 def parse_selection(basedir):
     if not os.path.isfile(f'{basedir}/csel.csv'):
+        print("Cannot find csel.csv")
         return None
 
-    with open(f'{basedir}/csel.txt', 'r', encoding='UTF-8') as file:
+    with open(f'{basedir}/csel.csv', 'r', encoding='UTF-8') as file:
         raw_data = file.readlines()
     columns = raw_data[0].strip().strip('|').split('|')
     columns = [x.strip() for x in columns]

@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
     basedir = config["basedir"]
     formation = config["formation"]
-    all_csvs = ['all_attrs', 'octs', 'wsums', 'cd', 'fb', 'dm', 'cm', 'wm', 'amc', 'amlr', 'st']
+    all_csvs = ['all_attrs', 'octs', 'wsums', 'cd', 'fb', 'dm', 'cm', 'wm', 'amc', 'amlr', 'st', 'abis']
     all_dfs = {}
     if formation:
         formation_df = view_parse.parse_selection(basedir)
