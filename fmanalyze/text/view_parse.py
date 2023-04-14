@@ -40,16 +40,20 @@ def deal_with_fuzzy_attrs(field):
         if first.isdigit() and lst.isdigit():
             return round((int(first) + int(lst)) / 2)
         else:
-            return field
+            return 0
     else:
         return field
 
 def parse_attr_list(basedir):
+
+    last_part = os.path.basename(basedir)
+    attr_filename = f'{basedir}/{last_part}.rtf'
+
     if os.path.isfile(f'{basedir}/all_attrs.csv'):
         df = pd.read_csv(f'{basedir}/all_attrs.csv')
         return df
     else:
-        with open(f'{basedir}/all_attrs.txt', 'r', encoding='UTF-8') as file:
+        with open(attr_filename, 'r', encoding='UTF-8') as file:
             raw_data = [line for line in file.readlines() if line.strip() ]
         print(raw_data)
 
@@ -58,7 +62,7 @@ def parse_attr_list(basedir):
         # Clean the data
         cleaned_data = []
         for line in raw_data:
-            if not line or not 'Pick Player' in line:
+            if not line or not line.strip() or not 'Pick Player' in line:
                 continue
             line = line.strip().replace(" - Pick Player ", "").strip('|')
 
@@ -66,6 +70,8 @@ def parse_attr_list(basedir):
             cleaned_line = [deal_with_fuzzy_attrs(x) for x in cleaned_line]
             cleaned_data.append(cleaned_line)
         df = pd.DataFrame(cleaned_data, columns=columns)
+        df = df.drop(columns=["Position"], axis=1)
+        columns = df.columns
         for col in columns[1:]:
             df[col] = df[col].astype(int)
         df.to_csv(f'{basedir}/all_attrs.csv', encoding='UTF-8', index=False)

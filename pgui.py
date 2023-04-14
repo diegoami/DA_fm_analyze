@@ -2,7 +2,7 @@ import argparse
 from pandasgui import show
 import pandas
 import yaml
-import view_parse
+from fmanalyze.text import view_parse
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
