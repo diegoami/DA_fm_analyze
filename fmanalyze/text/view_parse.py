@@ -38,18 +38,18 @@ def deal_with_fuzzy_attrs(field):
     if '-' in field:
         first, lst = field.split('-')
         if first.isdigit() and lst.isdigit():
-            return round((int(first) + int(lst)) / 2)
+            return round((float(first) + float(lst) / 2), 2)
         else:
             return 0
     else:
         return field
 
-def parse_attr_list(basedir):
+def parse_attr_list(basedir, overwrite=True):
 
     last_part = os.path.basename(basedir)
     attr_filename = f'{basedir}/{last_part}.rtf'
 
-    if os.path.isfile(f'{basedir}/all_attrs.csv'):
+    if not overwrite and os.path.isfile(f'{basedir}/all_attrs.csv'):
         df = pd.read_csv(f'{basedir}/all_attrs.csv')
         return df
     else:
@@ -73,6 +73,6 @@ def parse_attr_list(basedir):
         df = df.drop(columns=["Position"], axis=1)
         columns = df.columns
         for col in columns[1:]:
-            df[col] = df[col].astype(int)
+            df[col] = df[col].astype(float)
         df.to_csv(f'{basedir}/all_attrs.csv', encoding='UTF-8', index=False)
         return df
