@@ -38,7 +38,7 @@ def deal_with_fuzzy_attrs(field):
     if '-' in field:
         first, lst = field.split('-')
         if first.isdigit() and lst.isdigit():
-            return round((float(first) + float(lst) / 2), 2)
+            return round((float(first) + float(lst)) / 2, 2)
         else:
             return 0
     else:
@@ -49,10 +49,9 @@ def parse_attr_list(basedir, overwrite=True):
     last_part = os.path.basename(basedir)
     attr_filename = f'{basedir}/{last_part}.rtf'
 
-    if not overwrite and os.path.isfile(f'{basedir}/all_attrs.csv'):
-        df = pd.read_csv(f'{basedir}/all_attrs.csv')
-        return df
-    else:
+
+
+    if os.path.isfile(attr_filename) and overwrite:
         with open(attr_filename, 'r', encoding='UTF-8') as file:
             raw_data = [line for line in file.readlines() if line.strip() ]
         print(raw_data)
@@ -78,3 +77,16 @@ def parse_attr_list(basedir, overwrite=True):
         df.to_csv(f'{basedir}/all_attrs.csv', encoding='UTF-8', index=False)
         pos_df.to_csv(f'{basedir}/pos.csv', encoding='UTF-8', index=False)
         return df, pos_df
+    else:
+        if os.path.isfile(f'{basedir}/all_attrs.csv'):
+            df = pd.read_csv(f'{basedir}/all_attrs.csv')
+            if os.path.isfile(f'{basedir}/pos.csv'):
+                pos_df = pd.read_csv(f'{basedir}/pos.csv')
+                return df, pos_df
+            else:
+                pos_df = df[["Player", "UID", "Position"]].copy()
+                pos_df.to_csv(f'{basedir}/pos.csv', encoding='UTF-8', index=False)
+                return df, pos_df
+        else:
+            print(f'Cannot find {attr_filename}')
+            return None, None

@@ -2,9 +2,22 @@ import argparse
 import yaml
 import os
 import pandas as pd
+from fmanalyze.attrs.positions import weights
 
 COL_ROLES = ['GK', 'DR', 'DC', 'DL', 'WBR', 'DM', 'WBL', 'MR', 'MC', 'ML', 'AMR', 'AMC', 'AML', 'STC']
 
+POS_MAP = {
+    'GK': ['GK'],
+    'DRL' : ['DR', 'DL'],
+    'DC' : ['DC'],
+    'WBRL' : ['WBR', 'WBL'],
+    'DM' : ['DM'],
+    'MRL' : ['MR', 'ML'],
+    'AMRL' : ['AMR', 'AML'],
+    'ST' : ['STC'],
+    'MC' : ['MC'],
+    'AMC' : ['AMC']
+}
 
 def expand_position(position, suffix):
     return [p.strip() + suffix for p in position.split('/')]
@@ -46,3 +59,12 @@ def do_extract(basedir, pos_df=None):
     roles_df.to_csv(os.path.join(basedir, 'roles.csv'), index=False)
 
 
+def do_expand(basedir, pos_df, wsums_df):
+    exp_df = pos_df[['Player','UID']].copy()
+    for index, row in wsums_df.iterrows():
+        for col in wsums_df.columns:
+            if col in POS_MAP:
+                expanded_poses = POS_MAP[col]
+                for expanded_pos in expanded_poses:
+                    exp_df.loc[index, expanded_pos] = row[col]
+    exp_df.to_csv(os.path.join(basedir, 'exp.csv'), index=False)

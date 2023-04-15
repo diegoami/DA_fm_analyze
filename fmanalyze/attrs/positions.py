@@ -15,7 +15,7 @@ weights = {
     'MC': [1, 2, 2, 6, 1, 3, 3, 6, 3, 4, 3, 1, 3, 2, 7, 1, 3, 3, 2, 6, 6, 6, 6, 2, 1, 5, 5, 4],
     'AMRL': [5, 5, 2, 5, 1, 2, 1, 2, 2, 4, 3, 1, 3, 2, 5, 1, 2, 1, 2, 3, 3, 10, 6, 2, 1, 10, 7, 3],
     'AMC' : [1, 3, 3, 5, 1, 3, 1, 4, 2, 5, 3, 1, 3, 2, 6, 1, 3, 2, 2, 6, 3, 9, 6, 2, 1, 7, 6 ,3],
-    'SC' : [2, 5, 8, 6, 6, 2, 1, 2, 1, 4, 5, 1, 6, 2, 5, 1, 6, 2, 1, 2, 2, 10, 6, 2, 5, 7, 6, 6]
+    'ST' : [2, 5, 8, 6, 6, 2, 1, 2, 1, 4, 5, 1, 6, 2, 5, 1, 6, 2, 1, 2, 2, 10, 6, 2, 5, 7, 6, 6]
 }
 
 
@@ -23,8 +23,13 @@ def calculate_weighted_sum(basedir, df,  weights):
     new_df = df[['Player', 'UID']]
 
     for role, weight_values in weights.items():
-        new_df[role] = df[abbr_keys].multiply(weight_values, axis=1).sum(axis=1)
+        sum_weights = sum(weight_values)
+        weight_values_l = [x / sum_weights for x in weight_values]
+        new_df[role] = df[abbr_keys].multiply(weight_values_l, axis=1).sum(axis=1)
+    # Rounds all values to 2 decimals
+    new_df = new_df.round(2)
     new_df.to_csv(f'{basedir}/wsums.csv', index=False)
+
     return new_df
 
 
@@ -36,17 +41,21 @@ def calculate_weighted_sum_2(basedir, df,  weights):
 
     for role, weight_values in weights.items():
         print(f"Calculating weighted sum for role: {role}")
+        sum_weights = sum(weight_values)
+        weight_values_l = [x / sum_weights for x in weight_values]
 
         for idx, row in df.iterrows():
             new_df.at[idx, role] = 0
             print(f"  For player {new_df.at[idx, 'Player']}: ")
             idxstr = ""
-            for col, weight_value in zip(dfc.columns, weight_values):
-                idxstr += f"'{col}': {weight_value} * "
+            for col, weight_value_l in zip(dfc.columns, weight_values_l):
+                idxstr += f"'{col}': {weight_value_l} * "
                 idxstr += f" {row[col]} + "
                 #idxstr += f"weighted sum: {row[col] * weight_value}, "
-                new_df.at[idx, role] += row[col] * weight_value
+                new_df.at[idx, role] += row[col] * weight_value_l
             print(idxstr)
             print(f"  Total weighted sum for index {idx}: {new_df.at[idx, role]}\n")
+    new_df = new_df.round(2)
+
     new_df.to_csv(f'{basedir}/wsums2.csv', index=False)
     return new_df

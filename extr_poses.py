@@ -5,7 +5,7 @@ from fmanalyze.roles.extract import do_extract
 
 pd.options.mode.chained_assignment = None
 import yaml
-import glob
+
 
 
 
