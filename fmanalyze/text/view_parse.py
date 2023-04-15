@@ -70,9 +70,11 @@ def parse_attr_list(basedir, overwrite=True):
             cleaned_line = [deal_with_fuzzy_attrs(x) for x in cleaned_line]
             cleaned_data.append(cleaned_line)
         df = pd.DataFrame(cleaned_data, columns=columns)
+        pos_df = df[["Player", "UID", "Position"]].copy()
         df = df.drop(columns=["Position"], axis=1)
         columns = df.columns
         for col in columns[1:]:
             df[col] = df[col].astype(float)
         df.to_csv(f'{basedir}/all_attrs.csv', encoding='UTF-8', index=False)
-        return df
+        pos_df.to_csv(f'{basedir}/pos.csv', encoding='UTF-8', index=False)
+        return df, pos_df

@@ -7,6 +7,7 @@ from fmanalyze.attrs.roles import *
 from fmanalyze.attrs.positions import *
 from fmanalyze.attrs.abilities import create_abilities
 from fmanalyze.attrs.instructions import *
+from fmanalyze.roles.extract import do_extract
 
 pd.options.mode.chained_assignment = None
 import yaml
@@ -24,18 +25,19 @@ def create_all_dfs():
 
 
 def create_dfs_for_basedir(basedir, overwrite=True):
-    df = parse_attr_list(basedir, overwrite=overwrite)
+    df, pos_df = parse_attr_list(basedir, overwrite=overwrite)
     octs_df = create_octs(basedir, df)
     all_roles_df = create_all_roles(basedir, df)
     wsums_df = calculate_weighted_sum(basedir, df, weights)
     abis_df = create_abilities(basedir, df)
     instrs = build_instrs(basedir, df)
+    do_extract(basedir, pos_df)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--config', help='Path to conf  ig file', default=None, required=False)
+    parser.add_argument('--config', help='Path to config file', default=None, required=False)
     args = parser.parse_args()
     if args.config == None:
         create_all_dfs()
