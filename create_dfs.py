@@ -28,7 +28,7 @@ def create_dfs_for_basedir(basedir, overwrite=True):
     df, pos_df = parse_attr_list(basedir, overwrite=overwrite)
     octs_df = create_octs(basedir, df)
     all_roles_df = create_all_roles(basedir, df)
-    wsums_df = calculate_weighted_sum_2(basedir, df, weights)
+    wsums_df = calculate_weighted_sum(basedir, df, weights)
     do_expand(basedir, pos_df, wsums_df)
     abis_df = create_abilities(basedir, df)
     instrs = build_instrs(basedir, df)
