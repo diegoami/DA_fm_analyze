@@ -5,6 +5,7 @@ import yaml
 from fmanalyze.text import view_parse
 from fmanalyze.roles.extract import COL_ROLES
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
