@@ -7,7 +7,8 @@ from fmanalyze.text import view_parse
 import sys
 import pandas as pd
 from PyQt5.QtWidgets import QApplication, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QTabWidget
-from PyQt5.QtGui import QColor
+from PyQt5.QtGui import QColor, QStandardItemModel
+from fmanalyze.ui.frozentable import FreezeTableWidget
 
 # Define a custom style function
 def color_based_on_distribution(column):
@@ -30,10 +31,14 @@ def color_based_on_distribution(column):
     return color_mapper
 
 # Create a PyQt5 table widget from a pandas DataFrame with color-coded cells
+
 def create_table_widget(df):
     table = QTableWidget()
     table.setRowCount(df.shape[0])
     table.setColumnCount(df.shape[1])
+    table.setSortingEnabled(True)
+    # Set a specific column to be pinned to the left
+    #table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
 
     for i, column in enumerate(df.columns):
         for j, value in enumerate(df[column]):
@@ -75,10 +80,11 @@ if __name__ == "__main__":
 
     window = QWidget()
     layout = QVBoxLayout(window)
-
     tab_widget = QTabWidget()
 
     for name, df in all_dfs.items():
+        model = QStandardItemModel()
+
         table_widget = create_table_widget(df)
         tab_widget.addTab(table_widget, name)
 
