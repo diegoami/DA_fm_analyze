@@ -1,14 +1,11 @@
 import argparse
-from pandasgui import show
 import pandas
 import yaml
 from fmanalyze.roles.extract import COL_ROLES
-from fmanalyze.text import view_parse
 import sys
-import pandas as pd
 from PyQt5.QtWidgets import QApplication, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QTabWidget
 from PyQt5.QtGui import QColor, QStandardItemModel
-from fmanalyze.ui.frozentable import FreezeTableWidget
+
 
 # Define a custom style function
 def color_based_on_distribution(column):

@@ -1,8 +1,8 @@
 import argparse
 import os
 
-from fmanalyze.attrs.octs import create_octs
-from fmanalyze.text.view_parse import parse_attr_list
+from fmanalyze.attrs.octs import create_octs, create_gk_octs
+from fmanalyze.attrs.main_attrs import parse_attr_list
 from fmanalyze.attrs.roles import *
 from fmanalyze.attrs.positions import *
 from fmanalyze.attrs.abilities import create_abilities
@@ -27,6 +27,7 @@ def create_all_dfs():
 def create_dfs_for_basedir(basedir, overwrite=True):
     df, pos_df = parse_attr_list(basedir, overwrite=overwrite)
     octs_df = create_octs(basedir, df)
+    gk_octs_df = create_gk_octs(basedir, df)
     all_roles_df = create_all_roles(basedir, df)
     wsums_df = calculate_weighted_sum(basedir, df, weights)
     do_expand(basedir, pos_df, wsums_df)
