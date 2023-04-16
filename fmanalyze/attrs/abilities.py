@@ -25,6 +25,7 @@ ATTRS_TO_ADD = {
     "Off The Ball" : ['OtB', 'Cmp'],
     "Passing" : ['Pas', 'Tec', 'Cmp'],
     "Physical" : ['Str', 'Bal'],
+    "Shooting" : ['Fin', 'Lon', 'Tec'],
     "Tackling" : ['Tck', 'Cmp'],
 
 }
