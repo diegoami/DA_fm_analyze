@@ -41,9 +41,9 @@ def create_abilities(basedir, df):
     for attr, cols in ATTRS_TO_ADD.items():
         new_df[attr] = df[cols].mean(axis=1)
 
-    new_df.to_csv(f'{basedir}/abis.csv', index=False)
 
     new_df[columns_to_round] = new_df[columns_to_round].round(2)
+    new_df.to_csv(f'{basedir}/abis.csv', index=False)
     return new_df
 
 def split_abilities(df):
