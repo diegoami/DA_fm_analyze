@@ -16,14 +16,27 @@ from dash.dependencies import Input, Output
 
 app = dash.Dash(__name__)
 all_dfs = {}
+color_dfs = {}
 
-
+color_map = {-2: 'red', -1: 'orange', 0: 'yellow', 1: 'lightgreen', 2: 'darkgreen'}
 @app.callback(Output('tab-content', 'children'), [Input('tabs', 'value')])
 def render_content(tab):
     df = all_dfs[tab]
+    style_conditions = []
+    color_df = color_dfs[f'{tab}_color']
+    for index, row in color_df.iterrows():
+        for icol, col in enumerate(color_df.columns):
+            if col not in ['Player', 'UID', 'Position']:
+                content = row[col]
+                style_conditions.append({
+                    'if': {'row_index': index, 'column_id': col},
+                    'backgroundColor': color_map[content],
+                })
+
     return dash_table.DataTable(
         columns=[{"name": i, "id": i} for i in df.columns],  # Add column id
-        data=df.to_dict('records')
+        data=df.to_dict('records'),
+        style_data_conditional=style_conditions
     )
 
 if __name__ == '__main__':
@@ -66,7 +79,7 @@ if __name__ == '__main__':
     # league dir is the parent directory of basedir
     league_dir = os.path.dirname(basedir)
 
-    color_dfs = {f'{name}_color': df.copy() for name, df in all_dfs.items()}
+    color_dfs.update({f'{name}_color': df.copy() for name, df in all_dfs.items()})
     for name, df in color_dfs.items():
         df.loc[:, ~df.columns.isin(["Player", "UID"])] = 0
 
@@ -78,29 +91,33 @@ if __name__ == '__main__':
         color_roles_dfs[quantile_octs_df_name] = pd.read_csv(f'{league_dir}/{quantile_octs_df_name}.csv')
 
     for name, df in all_dfs.items():
-        if name in ['tec', 'men', 'phys']:
+        if name in ['tec', 'men', 'phys', 'octs', 'tecabi', 'menabi', 'physabi']:
             print("Processing", name)
             for item, row in df.iterrows():
                 player, uid = row['Player'], row['UID']
                 position = row['Position']
                 if name in ['tec', 'men', 'phys']:
                     ref_color_df = color_roles_dfs[f'quantiles_{position}_attrs']
-                    color_df = color_dfs[f'{name}_color']
+                elif name in ['tecabi', 'menabi', 'physabi']:
+                    ref_color_df = color_roles_dfs[f'quantiles_{position}_abis']
+                elif name in ['octs']:
+                    ref_color_df = color_roles_dfs[f'quantiles_{position}_octs']
+                color_df = color_dfs[f'{name}_color']
 
-                    for index, ref_color_row in ref_color_df.iterrows():
+                for index, ref_color_row in ref_color_df.iterrows():
 
-                        col = ref_color_row['COL']
-                        if col in df.columns:
-                            if row[col] < ref_color_row['Q20']:
-                                color_df.loc[(color_df['UID'] == uid), col] = -2
-                            if row[col] >= ref_color_row['Q20'] and row[col] < ref_color_row['Q40']:
-                                color_df.loc[(color_df['UID'] == uid), col] = -1
-                            elif row[col] >= ref_color_row['Q40'] and row[col] < ref_color_row['Q60']:
-                                color_df.loc[(color_df['UID'] == uid), col] = 0
-                            elif row[col] >= ref_color_row['Q60'] and row[col] < ref_color_row['Q80']:
-                                color_df.loc[(color_df['UID'] == uid), col] = 1
-                            elif row[col] >= ref_color_row['Q80']:
-                                color_df.loc[(color_df['UID'] == uid), col] = 2
+                    col = ref_color_row['COL']
+                    if col in df.columns:
+                        if row[col] < ref_color_row['Q20']:
+                            color_df.loc[(color_df['UID'] == uid), col] = -2
+                        if row[col] >= ref_color_row['Q20'] and row[col] < ref_color_row['Q40']:
+                            color_df.loc[(color_df['UID'] == uid), col] = -1
+                        elif row[col] >= ref_color_row['Q40'] and row[col] < ref_color_row['Q60']:
+                            color_df.loc[(color_df['UID'] == uid), col] = 0
+                        elif row[col] >= ref_color_row['Q60'] and row[col] < ref_color_row['Q80']:
+                            color_df.loc[(color_df['UID'] == uid), col] = 1
+                        elif row[col] >= ref_color_row['Q80']:
+                            color_df.loc[(color_df['UID'] == uid), col] = 2
     # Initialize the Dash app
    # app = dash.Dash(__name__)
 
