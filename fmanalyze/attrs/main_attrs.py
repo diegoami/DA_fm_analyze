@@ -7,12 +7,17 @@ phys_keys = ['Acc', 'Agi', 'Bal', 'Jum', 'Pac', 'Sta', 'Str']
 
 
 def separate_in_tec_men_phys(df):
-    tec_df = df[['Player', 'UID'] + tec_keys].copy()
-    men_df = df[['Player', 'UID'] + men_keys].copy()
-    phys_def = df[['Player', 'UID'] + phys_keys].copy()
+    columns = ['Player', 'UID']
+    if "Position" in df.columns:
+        columns.append('Position')
+    tec_df = df[columns + tec_keys].copy()
+    men_df = df[columns + men_keys].copy()
+    phys_def = df[columns + phys_keys].copy()
     return tec_df, men_df, phys_def
 
 
+def fill_color_df(df, color_df, quantile_dfs):
+    pass
 def deal_with_fuzzy_attrs(field):
     if '-' in field:
         first, lst = field.split('-')

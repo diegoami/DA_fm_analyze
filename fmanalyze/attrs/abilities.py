@@ -47,8 +47,11 @@ def create_abilities(basedir, df):
     return new_df
 
 def split_abilities(df):
-    tec_abis = df[['Player', 'UID'] + tecabi_keys].copy()
-    men_abis = df[['Player', 'UID'] + menabi_keys].copy()
-    phys_abis = df[['Player', 'UID'] + phsyabi_keys].copy()
+    columns = ['Player', 'UID']
+    if "Position" in df.columns:
+        columns.append('Position')
+    tec_abis = df[columns + tecabi_keys].copy()
+    men_abis = df[columns + menabi_keys].copy()
+    phys_abis = df[columns + phsyabi_keys].copy()
 
     return tec_abis, men_abis, phys_abis
