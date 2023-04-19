@@ -1,12 +1,32 @@
-Player,UID,Position
-Álex Remiro,67183918,GK
-Brandon Williams,28115834,DL
-Robin Le Normand,48037162,DC
-William Saliba,49039004,DC
-Piotr Jabłoński,2000623979,DR
-Renato Pereira,2000190646,DM
-Ayrton Tallura,2000274550,MC
-Denis Zakaria,98034601,MC
-Adam Hlozek,31041522,AML
-Luka Bransteter,2000054638,AMR
-Tibo De Vos,2000663034,STC
+Match,Player,UID,Position
+#,Álex Remiro,67183918,GK
+GK,Kim Christian Høyenhall,2000182998,GK
+DC,Robin Le Normand,48037162,D (C)
+#,António Silva,83320135,D (C)
+DC,William Saliba,49039004,D (RLC)
+#,Lukas Mohr,2000432897,D (RLC)
+DR,Piotr Jabłoński,2000623979,D/WB/AM (R)
+#,Denis Zakaria,98034601,"D (C), DM, M (C)"
+DM,Renato Pereira,2000190646,"D (C), DM, M (C)"
+#,John Damiano,2000435431,"D (RC), DM, M (C)"
+MC,Ignacio Vallina,2000570634,"D (C), DM, M (C)"
+DL,Brandon Williams,28115834,D/WB (RL)
+#,David Carmo,83111598,"D (LC), DM"
+#,Souza,2000607666,"D (LC), DM, M (C)"
+#,Kai Ocaña,2000194470,D/M/AM (R)
+#,José Gragera,67263880,"DM, M (C)"
+#,Sergi Pascual,2000196434,"DM, M (C)"
+#,Paweł Brzyski,2000433744,"DM, M/AM (C)"
+#,Scott Diaz,2000706461,"DM, M/AM (C)"
+#,Pablo,2000572050,WB/M/AM (L)
+#,Gaetano Oristanio,43425611,"M/AM (C), ST (C)"
+MC,Ayrton Tallura,2000274550,M/AM (C)
+#,John Bueno,2000419425,"M (RC), AM (C)"
+#,Felipe,2000510074,"M/AM (R), ST (C)"
+#,Matthias Hasa,2000568032,M/AM (L)
+#,Koldo Valencia,2000663358,"M (R), AM (RLC)"
+AMR,Luka Bransteter,2000054638,"AM (R), ST (C)"
+STC,Tibo De Vos,2000663034,"AM (R), ST (C)"
+#,Gabriel Martinelli,19351309,"AM (RLC), ST (C)"
+AML,Adam Hlozek,31041522,"AM (RL), ST (C)"
+#,Mikel Oyarzábal,67220143,"AM (RLC), ST (C)"

@@ -2,7 +2,7 @@ import argparse
 from pandasgui import show
 import pandas
 import yaml
-from fmanalyze.selection import formation
+from fmanalyze.roles import formation
 from fmanalyze.attrs.main_attrs import separate_in_tec_men_phys
 from fmanalyze.attrs.abilities import split_abilities
 

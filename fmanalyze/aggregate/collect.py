@@ -18,3 +18,7 @@ def fill_all_dfs(all_dfs, basedir, formation_df=None):
     all_dfs['octs'] = all_octs
     all_dfs['tec'], all_dfs['men'], all_dfs['phys'] = separate_in_tec_men_phys(all_attrs)
     all_dfs['tecabi'], all_dfs['menabi'], all_dfs['physabi'] = split_abilities(all_abilities)
+    for df in all_dfs.values():
+        if 'Position' in df.columns:
+            temp_column = df.pop('Position')
+            df.insert(0, 'Position', temp_column)

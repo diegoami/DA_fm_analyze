@@ -1,6 +1,6 @@
 import pandas as pd
 
-
+from fmanalyze.roles.utils import convert_position
 from fmanalyze.roles.extract import COL_ROLES
 
 
@@ -14,6 +14,8 @@ def create_color_roles_dfs(league_dir):
     return color_roles_dfs
 
 
+
+
 def fill_color_dfs(color_dfs, all_dfs, color_roles_dfs):
     color_dfs.update({f'{name}_color': df.copy() for name, df in all_dfs.items()})
     for name, df in color_dfs.items():
@@ -24,6 +26,7 @@ def fill_color_dfs(color_dfs, all_dfs, color_roles_dfs):
             for item, row in df.iterrows():
                 player, uid = row['Player'], row['UID']
                 position = row['Position']
+                position = convert_position(position)
                 if name in ['tec', 'men', 'phys']:
                     ref_color_df = color_roles_dfs[f'quantiles_{position}_attrs']
                 elif name in ['tecabi', 'menabi', 'physabi']:

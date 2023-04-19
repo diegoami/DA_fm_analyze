@@ -8,6 +8,7 @@ import yaml
 
 from fmanalyze.aggregate.collect import fill_all_dfs
 from fmanalyze.aggregate.color import create_color_roles_dfs, fill_color_dfs
+from fmanalyze.roles.formation import read_formation
 import os
 from dash.dependencies import Input, Output
 import dash_html_components as html
@@ -16,29 +17,43 @@ app = dash.Dash(__name__)
 own_all_dfs = {}
 rival_all_dfs = {}
 color_dfs = {}
+rival_color_dfs = {}
 
 color_map = {-2: 'red', -1: 'orange', 0: 'yellow', 1: 'lightgreen', 2: 'darkgreen'}
 @app.callback(Output('tab-content', 'children'), [Input('tabs', 'value')])
 def render_content(tab):
     color_df = color_dfs[f'{tab}_color']
-
+    rival_color_df = rival_color_dfs[f'{tab}_color']
     df = own_all_dfs[tab]
     rival_df = rival_all_dfs[tab]
 
     style_conditions = fill_style_conditions(color_df)
+    rival_style_conditions = fill_style_conditions(rival_color_df)
 
     # Create the DataTable for df
     table_df = dash_table.DataTable(
         columns=[{"name": i, "id": i} for i in df.columns],
         data=df.to_dict('records'),
-        style_data_conditional=style_conditions
+        style_data_conditional=style_conditions,
+        style_cell={
+            'textAlign': 'center'
+        },
+        style_header={
+            'textAlign': 'center'
+        }
     )
 
     # Create the DataTable for rival_df
     table_rival_df = dash_table.DataTable(
         columns=[{"name": i, "id": i} for i in rival_df.columns],
         data=rival_df.to_dict('records'),
-        style_data_conditional=style_conditions
+        style_data_conditional=rival_style_conditions,
+        style_cell={
+            'textAlign': 'center'
+        },
+        style_header={
+            'textAlign': 'center'
+        }
     )
 
     # Return a Div containing both DataTables
@@ -79,19 +94,19 @@ if __name__ == '__main__':
     formation_flag = config["formation"]
     # league dir is the parent directory of basedir
     league_dir = os.path.dirname(basedir)
-    formation_df, formation_rivalo_df = None, None
+    formation_df, formation_rival_df = None, None
     #all_csvs = ['octs', 'gk_octs']
     if formation_flag:
-        formation_df = pd.read_csv(f'{basedir}/formation.csv')
+        formation_df = read_formation(basedir)
         if rivaldir is not None:
-            formation_rival_df = pd.read_csv(f'{rivaldir}/formation.csv')
+            formation_rival_df = read_formation(rivaldir)
     color_roles_dfs = create_color_roles_dfs(league_dir)
 
     fill_all_dfs(own_all_dfs, basedir, formation_df)
     fill_color_dfs(color_dfs, own_all_dfs, color_roles_dfs)
     if rivaldir is not None:
         fill_all_dfs(rival_all_dfs, rivaldir, formation_rival_df)
-        fill_color_dfs(color_dfs, rival_all_dfs, color_roles_dfs)
+        fill_color_dfs(rival_color_dfs, rival_all_dfs, color_roles_dfs)
 
     # Define the layout of the app
     app.layout = html.Div([
