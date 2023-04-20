@@ -33,8 +33,8 @@ def parse_selection(basedir):
     df.drop(columns=["Name"], inplace=True, axis=1)
     return df
 
-def read_formation(formation_dir):
-    formation_file = os.path.join(formation_dir, 'formation.csv')
+def read_formation(formation_file):
+    #formation_file = os.path.join(formation_dir, 'formation.csv')
     with open(formation_file, 'r', encoding='UTF-8') as file:
         lines = file.readlines()
 

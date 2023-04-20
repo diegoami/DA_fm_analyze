@@ -2,7 +2,7 @@ import argparse
 import os
 
 from fmanalyze.attrs.instructions import *
-from create_dfs import create_dfs_for_basedir
+from scripts.create.create_dfs import create_dfs_for_basedir
 pd.options.mode.chained_assignment = None
 import yaml
 import shutil
@@ -16,14 +16,23 @@ if __name__ == '__main__':
     with open(args.config, 'r') as confhandle:
         config = yaml.safe_load(confhandle)
 
-    sourcedir = config["source_dir"]
-    targetdir = config["target_dir"]
-    for rtf_filame in os.listdir(sourcedir):
-        print(f'Processing {rtf_filame}...')
-        dir_to_create = os.path.splitext(rtf_filame)[0]
-        basedir = os.path.join(targetdir, dir_to_create)
-        os.makedirs(os.path.join(basedir), exist_ok=True)
-        shutil.copyfile(os.path.join(sourcedir, rtf_filame), os.path.join(basedir, rtf_filame))
-        #os.system(f'cp {os.path.join(sourcedir, rtf_filame)} {os.path.join(basedir, rtf_filame)}')
-        print(f'Creating dfs for {basedir}...')
-        create_dfs_for_basedir(basedir)
+    sourcedir = config.get("source_dir", None)
+    targetdir = config.get("target_dir", None)
+
+    if sourcedir is not None and targetdir is not None:
+        teams_dir = os.path.join(targetdir, 'teams')
+
+        for rtf_filame in os.listdir(sourcedir):
+            print(f'Processing {rtf_filame}...')
+            dir_to_create = os.path.splitext(rtf_filame)[0]
+            basedir = os.path.join(teams_dir, dir_to_create)
+
+            os.makedirs(os.path.join(basedir), exist_ok=True)
+            shutil.copyfile(os.path.join(sourcedir, rtf_filame), os.path.join(basedir, rtf_filame))
+            print(f'Creating dfs for {basedir}...')
+
+    if targetdir is not None:
+        print("Creating dfs for all dirs in targetdir...")
+        for dir in os.listdir(teams_dir):
+            basedir = os.path.join(teams_dir, dir)
+            create_dfs_for_basedir(basedir)

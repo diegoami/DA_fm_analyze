@@ -4,11 +4,11 @@ import pandas as pd
 from fmanalyze.roles.extract import COL_ROLES
 
 
-def save_stats_for_attrs(basedir, filesufix):
+def save_stats_for_attrs(rolesdir, quantilesdir, filesufix):
     all_csvs = [f'{role}_{filesufix}' for role in COL_ROLES]
     all_dfs = {}
     for csv in all_csvs:
-        csv_df = pandas.read_csv(f'{basedir}/{csv}.csv')
+        csv_df = pandas.read_csv(f'{rolesdir}/{csv}.csv')
         all_dfs[csv] = csv_df
         quantiles_df = pd.DataFrame(columns=["DF", "COL", "Q0", "Q20", "Q40", "Q60", "Q80", "Q100"])
         print(csv_df.dtypes)
@@ -29,5 +29,5 @@ def save_stats_for_attrs(basedir, filesufix):
                 # add a new row to the dataframe
                 quantiles_df = pd.concat([quantiles_df, quantiles_csv_df_cols], ignore_index=True)
         print(f"Saving quantiles_{csv}.csv")
-        quantiles_df.to_csv(f'{basedir}/quantiles_{csv}.csv')
+        quantiles_df.to_csv(f'{quantilesdir}/quantiles_{csv}.csv')
     # all_dfs = { all_csv : pandas.read_csv(f'{basedir}/{all_csv}.csv') for all_csv in all_csvs}

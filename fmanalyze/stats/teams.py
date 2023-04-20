@@ -3,10 +3,10 @@ import os
 import pandas as pd
 
 
-def combine_dfs(targetdir, filename):
+def combine_dfs(teamdir, roledir, filename):
     dataframes = {}
-    for teams in os.listdir(targetdir):
-        attr_file = os.path.join(targetdir, teams, filename)
+    for teams in os.listdir(teamdir):
+        attr_file = os.path.join(teamdir, teams, filename)
         if os.path.exists(attr_file):
             dataframes[teams] = pd.read_csv(attr_file)
     # Initialize an empty DataFrame to store the concatenated data
@@ -18,5 +18,5 @@ def combine_dfs(targetdir, filename):
         combined_df = pd.concat([combined_df, df_with_key], ignore_index=True)
     # The combined_df now contains all the DataFrames with an additional 'key' column
     print(combined_df)
-    combined_df.to_csv(os.path.join(targetdir, filename), index=False)
+    combined_df.to_csv(os.path.join(roledir, filename), index=False)
     return combined_df

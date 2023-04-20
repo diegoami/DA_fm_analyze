@@ -40,12 +40,12 @@ def fill_color_dfs(color_dfs, all_dfs, color_roles_dfs):
                     col = ref_color_row['COL']
                     if col in df.columns:
                         if row[col] < ref_color_row['Q20']:
-                            color_df.loc[(color_df['UID'] == uid), col] = -2
+                            color_df.loc[(color_df['UID'] == uid) & (color_df['Position'] == position), col] = -2
                         if row[col] >= ref_color_row['Q20'] and row[col] < ref_color_row['Q40']:
-                            color_df.loc[(color_df['UID'] == uid), col] = -1
+                            color_df.loc[(color_df['UID'] == uid) & (color_df['Position'] == position), col] = -1
                         elif row[col] >= ref_color_row['Q40'] and row[col] < ref_color_row['Q60']:
-                            color_df.loc[(color_df['UID'] == uid), col] = 0
+                            color_df.loc[(color_df['UID'] == uid) & (color_df['Position'] == position), col] = 0
                         elif row[col] >= ref_color_row['Q60'] and row[col] < ref_color_row['Q80']:
-                            color_df.loc[(color_df['UID'] == uid), col] = 1
+                            color_df.loc[(color_df['UID'] == uid) & (color_df['Position'] == position), col] = 1
                         elif row[col] >= ref_color_row['Q80']:
-                            color_df.loc[(color_df['UID'] == uid), col] = 2
+                            color_df.loc[(color_df['UID'] == uid) & (color_df['Position'] == position), col] = 2

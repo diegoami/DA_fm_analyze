@@ -1,0 +1,5 @@
+basedir: "/Users/diego/projects/DA_fm_data/laliga/"
+team: "rsana"
+formation: "formations/rsana/formation.csv"
+#formation: True
+#rivaldir: data/laliga/vigo
