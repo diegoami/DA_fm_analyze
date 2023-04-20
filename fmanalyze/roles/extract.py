@@ -39,7 +39,7 @@ def transform(input_str):
     return result
 
 
-def do_extract(basedir, pos_df=None):
+def extract_roles(basedir, pos_df=None):
     roles_df = pos_df[['Player','UID']].copy()
     # Add COL_ROLES to roles_df's columns
     for col in COL_ROLES:
@@ -59,7 +59,7 @@ def do_extract(basedir, pos_df=None):
     roles_df.to_csv(os.path.join(basedir, 'roles.csv'), index=False)
 
 
-def do_expand(basedir, pos_df, wsums_df):
+def evaluate_positions(basedir, pos_df, wsums_df):
     exp_df = pos_df[['Player','UID']].copy()
     for index, row in wsums_df.iterrows():
         for col in wsums_df.columns:
@@ -67,4 +67,20 @@ def do_expand(basedir, pos_df, wsums_df):
                 expanded_poses = POS_MAP[col]
                 for expanded_pos in expanded_poses:
                     exp_df.loc[index, expanded_pos] = row[col]
-    exp_df.to_csv(os.path.join(basedir, 'exp.csv'), index=False)
+    exp_df.to_csv(os.path.join(basedir, 'eval_pos.csv'), index=False)
+
+
+def extract_match_roles(teams_dir):
+    roles_df = pd.read_csv(os.path.join(teams_dir, 'roles.csv'))
+
+    full_df = pd.DataFrame(columns=['Match', 'Player', 'UID'])
+    for col in COL_ROLES:
+        # finds the rows where the role is not 0
+        players_in_roles = roles_df[roles_df[col] != 0][['Player', 'UID']]
+        players_in_roles.insert(0, 'Match', col)
+        players_in_roles['Match'] = col
+        full_df = pd.concat([full_df, players_in_roles], ignore_index=True)
+
+        full_df.to_csv(os.path.join(teams_dir, 'full_formation.csv'), index=False)
+    return full_df
+        # print(f"{col}: {len(ps)}")

@@ -1,13 +1,8 @@
 import argparse
 import os
 
-from fmanalyze.attrs.octs import create_octs, create_gk_octs
-from fmanalyze.attrs.main_attrs import parse_attr_list
-from fmanalyze.attrs.roles import *
-from fmanalyze.attrs.positions import *
-from fmanalyze.attrs.abilities import create_abilities
+from fmanalyze.aggregate.collect import create_dfs_for_basedir
 from fmanalyze.attrs.instructions import *
-from fmanalyze.roles.extract import do_extract, do_expand
 
 pd.options.mode.chained_assignment = None
 import yaml
@@ -22,18 +17,6 @@ def create_all_dfs():
         print(f'Processing {rtf_file}...')
         basedir = os.path.dirname(rtf_file)
         create_dfs_for_basedir(basedir)
-
-
-def create_dfs_for_basedir(basedir, overwrite=True):
-    df, pos_df = parse_attr_list(basedir, overwrite=overwrite)
-    octs_df = create_octs(basedir, df)
-    gk_octs_df = create_gk_octs(basedir, df)
-    all_roles_df = create_all_roles(basedir, df)
-    wsums_df = calculate_weighted_sum(basedir, df, weights)
-    do_expand(basedir, pos_df, wsums_df)
-    abis_df = create_abilities(basedir, df)
-    instrs = build_instrs(basedir, df)
-    do_extract(basedir, pos_df)
 
 
 if __name__ == '__main__':

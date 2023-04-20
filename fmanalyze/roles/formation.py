@@ -41,7 +41,7 @@ def read_formation(formation_file):
     filtered_lines = [line for line in lines if not line.startswith('#')]
     data = pd.read_csv(io.StringIO(''.join(filtered_lines)))
     if 'Match' in data.columns:
-        data.drop(columns=['Position'], inplace=True)
+#        data.drop(columns=['Position'], inplace=True)
         data.rename(columns={'Match': 'Position'}, inplace=True)
     data.sort_values(by=['Position'], inplace=True, key=lambda x: x.map(sort_positions))
     return data
