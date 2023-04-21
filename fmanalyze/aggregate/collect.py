@@ -29,11 +29,14 @@ def fill_all_dfs(all_dfs, basedir, formation_df=None):
     all_dfs['gk_octs'] = all_gk_octs
     all_dfs['tec'], all_dfs['men'], all_dfs['phys'], all_dfs['goalk'] = separate_in_tec_men_phys(all_attrs)
     all_dfs['tecabi'], all_dfs['menabi'], all_dfs['physabi'] = split_abilities(all_abilities)
-    for df in all_dfs.values():
+    for key, df in all_dfs.items():
         if 'Position' in df.columns:
             temp_column = df.pop('Position')
             df.insert(0, 'Position', temp_column)
-
+        if 'gk' in key:
+            all_dfs[key] = df[df['Position'] == 'GK']
+        else:
+            all_dfs[key] = df[df['Position'] != 'GK']
 
 def create_dfs_for_basedir(basedir, overwrite=True):
     df, pos_df = parse_attr_list(basedir, overwrite=overwrite)

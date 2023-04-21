@@ -58,10 +58,14 @@ def render_content(tab):
             }
         )
         return html.Div([
-            html.H4('Own Data'),
-            table_df,
-            html.H4('Rival Data'),
-            table_rival_df
+            html.Div([
+                html.H4('Own Data'),
+                table_df
+            ], style={'display': 'inline-block', 'margin-right': '20px'}),
+            html.Div([
+                html.H4('Rival Data'),
+                table_rival_df
+            ], style={'display': 'inline-block'})
         ])
     else:
         return html.Div([
