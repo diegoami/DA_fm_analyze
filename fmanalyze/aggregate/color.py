@@ -7,10 +7,13 @@ from fmanalyze.roles.extract import COL_ROLES
 def create_color_roles_dfs(league_dir):
     color_roles_dfs = {}
     for role in COL_ROLES:
-        quantile_abi_df_name, quantile_attr_df_name, quantile_octs_df_name = f'quantiles_{role}_abis', f'quantiles_{role}_attrs', f'quantiles_{role}_octs'
+        quantile_abi_df_name, quantile_attr_df_name, quantile_octs_df_name, quantile_gk_octs_df_name = \
+            f'quantiles_{role}_abis', f'quantiles_{role}_attrs', f'quantiles_{role}_octs', f'quantiles_{role}_gk_octs'
         color_roles_dfs[quantile_abi_df_name] = pd.read_csv(f'{league_dir}/{quantile_abi_df_name}.csv')
         color_roles_dfs[quantile_attr_df_name] = pd.read_csv(f'{league_dir}/{quantile_attr_df_name}.csv')
         color_roles_dfs[quantile_octs_df_name] = pd.read_csv(f'{league_dir}/{quantile_octs_df_name}.csv')
+        color_roles_dfs[quantile_gk_octs_df_name] = pd.read_csv(f'{league_dir}/{quantile_gk_octs_df_name}.csv')
+
     return color_roles_dfs
 
 
@@ -21,18 +24,23 @@ def fill_color_dfs(color_dfs, all_dfs, color_roles_dfs):
     for name, df in color_dfs.items():
         df.loc[:, ~df.columns.isin(["Player", "UID", "Position"])] = 0
     for name, df in all_dfs.items():
-        if name in ['tec', 'men', 'phys', 'octs', 'tecabi', 'menabi', 'physabi']:
+        if name in ['tec', 'men', 'phys', 'goalk', 'octs', 'gk_octs', 'tecabi', 'menabi', 'physabi']:
             print("Processing", name)
             for item, row in df.iterrows():
                 player, uid = row['Player'], row['UID']
+                if not 'Position' in row:
+                    print(row)
                 position = row['Position']
                 position = convert_position(position)
-                if name in ['tec', 'men', 'phys']:
+                if name in ['tec', 'men', 'phys', 'goalk']:
                     ref_color_df = color_roles_dfs[f'quantiles_{position}_attrs']
                 elif name in ['tecabi', 'menabi', 'physabi']:
                     ref_color_df = color_roles_dfs[f'quantiles_{position}_abis']
                 elif name in ['octs']:
                     ref_color_df = color_roles_dfs[f'quantiles_{position}_octs']
+                elif name in ['gk_octs']:
+                    ref_color_df = color_roles_dfs[f'quantiles_{position}_gk_octs']
+
                 color_df = color_dfs[f'{name}_color']
 
                 for index, ref_color_row in ref_color_df.iterrows():

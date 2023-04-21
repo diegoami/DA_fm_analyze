@@ -22,5 +22,7 @@ if __name__ == "__main__":
         quantilesdir = os.path.join(targetdir, 'quantiles')
         save_stats_for_attrs(rolesdir, quantilesdir, 'attrs')
         save_stats_for_attrs(rolesdir, quantilesdir, 'octs')
+        save_stats_for_attrs(rolesdir, quantilesdir, 'gk_octs')
+
         save_stats_for_attrs(rolesdir, quantilesdir, 'abis')
 

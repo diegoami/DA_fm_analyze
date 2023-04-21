@@ -4,6 +4,7 @@ import os
 tec_keys = ['Cro', 'Dri', 'Fin', 'Fir', 'Hea', 'Lon', 'Mar', 'Pas', 'Tck', 'Tec']
 men_keys = ['Ant', 'Bra', 'Cmp', 'Cnt', 'Dec', 'Ldr', 'OtB', 'Pos', 'Tea', 'Vis', 'Wor']
 phys_keys = ['Acc', 'Agi', 'Bal', 'Jum', 'Pac', 'Sta', 'Str']
+goalk_keys = ['Aer','Cmd','Com','Ecc','Han','Kic','Pun','1v1','Ref','TRO','Thr']
 
 
 def separate_in_tec_men_phys(df):
@@ -12,8 +13,9 @@ def separate_in_tec_men_phys(df):
         columns.append('Position')
     tec_df = df[columns + tec_keys].copy()
     men_df = df[columns + men_keys].copy()
-    phys_def = df[columns + phys_keys].copy()
-    return tec_df, men_df, phys_def
+    phys_df = df[columns + phys_keys].copy()
+    goalk_df = df[columns + goalk_keys].copy()
+    return tec_df, men_df, phys_df, goalk_df
 
 
 def fill_color_df(df, color_df, quantile_dfs):

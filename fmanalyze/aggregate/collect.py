@@ -11,6 +11,7 @@ from fmanalyze.roles.extract import evaluate_positions, extract_roles, extract_m
 
 def fill_all_dfs(all_dfs, basedir, formation_df=None):
     all_octs = pandas.read_csv(f'{basedir}/octs.csv')
+    all_gk_octs = pandas.read_csv(f'{basedir}/gk_octs.csv')
     all_attrs = pandas.read_csv(f'{basedir}/all_attrs.csv')
     all_abilities = pandas.read_csv(f'{basedir}/abis.csv')
     if formation_df is not None:
@@ -20,8 +21,13 @@ def fill_all_dfs(all_dfs, basedir, formation_df=None):
             columns={'Player_x': 'Player'})
         all_octs = formation_df.merge(all_octs, on='UID', how='inner').drop(columns=['Player_y']).rename(
             columns={'Player_x': 'Player'})
+        all_gk_octs = formation_df.merge(all_gk_octs, on='UID', how='inner').drop(columns=['Player_y']).rename(
+            columns={'Player_x': 'Player'})
+
+
     all_dfs['octs'] = all_octs
-    all_dfs['tec'], all_dfs['men'], all_dfs['phys'] = separate_in_tec_men_phys(all_attrs)
+    all_dfs['gk_octs'] = all_gk_octs
+    all_dfs['tec'], all_dfs['men'], all_dfs['phys'], all_dfs['goalk'] = separate_in_tec_men_phys(all_attrs)
     all_dfs['tecabi'], all_dfs['menabi'], all_dfs['physabi'] = split_abilities(all_abilities)
     for df in all_dfs.values():
         if 'Position' in df.columns:

@@ -1,3 +1,5 @@
+import os
+
 import pandas
 import pandas as pd
 
@@ -7,6 +9,7 @@ from fmanalyze.roles.extract import COL_ROLES
 def save_stats_for_attrs(rolesdir, quantilesdir, filesufix):
     all_csvs = [f'{role}_{filesufix}' for role in COL_ROLES]
     all_dfs = {}
+    os.makedirs(quantilesdir, exist_ok=True)
     for csv in all_csvs:
         csv_df = pandas.read_csv(f'{rolesdir}/{csv}.csv')
         all_dfs[csv] = csv_df
