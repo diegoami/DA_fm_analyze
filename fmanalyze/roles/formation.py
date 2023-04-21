@@ -33,9 +33,9 @@ def parse_selection(basedir):
     df.drop(columns=["Name"], inplace=True, axis=1)
     return df
 
-def read_formation(formation_file):
-    #formation_file = os.path.join(formation_dir, 'formation.csv')
-    with open(formation_file, 'r', encoding='UTF-8') as file:
+def read_formation(formation_dir, formation_file):
+    formation_full_file = os.path.join(formation_dir, formation_file)
+    with open(formation_full_file, 'r', encoding='UTF-8') as file:
         lines = file.readlines()
 
     filtered_lines = [line for line in lines if not line.startswith('#')]
@@ -45,3 +45,13 @@ def read_formation(formation_file):
         data.rename(columns={'Match': 'Position'}, inplace=True)
     data.sort_values(by=['Position'], inplace=True, key=lambda x: x.map(sort_positions))
     return data
+
+def save_formation(basedir, df):
+    with open(os.path.join(basedir, 'full_formation.csv'), 'w', encoding='UTF-8') as file:
+        header = f"{','.join(df.columns)}\n"
+        file.write(header)
+
+        # Write rows with '#' at the beginning
+        for index, row in df.iterrows():
+            formatted_row = f"#{','.join(row.astype(str))}\n"
+            file.write(formatted_row)

@@ -3,6 +3,7 @@ import yaml
 import os
 import pandas as pd
 from fmanalyze.attrs.positions import weights
+from fmanalyze.roles.formation import save_formation
 
 COL_ROLES = ['GK', 'DR', 'DC', 'DL', 'WBR', 'DM', 'WBL', 'MR', 'MC', 'ML', 'AMR', 'AMC', 'AML', 'STC']
 
@@ -81,6 +82,6 @@ def extract_match_roles(teams_dir):
         players_in_roles['Match'] = col
         full_df = pd.concat([full_df, players_in_roles], ignore_index=True)
 
-        full_df.to_csv(os.path.join(teams_dir, 'full_formation.csv'), index=False)
+    save_formation(teams_dir, full_df)
     return full_df
         # print(f"{col}: {len(ps)}")

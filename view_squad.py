@@ -107,9 +107,9 @@ if __name__ == '__main__':
     formation_df, formation_rival_df = None, None
     #all_csvs = ['octs', 'gk_octs']
     if formation:
-        formation_df = read_formation(formation)
+        formation_df = read_formation(teamdir, formation)
         if rivalformation is not None:
-            formation_rival_df = read_formation(rivalformation)
+            formation_rival_df = read_formation(rivaldir, rivalformation)
     color_roles_dfs = create_color_roles_dfs(quantilesdir)
 
     fill_all_dfs(own_all_dfs, teamdir, formation_df)

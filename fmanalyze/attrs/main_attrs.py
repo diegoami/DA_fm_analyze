@@ -18,8 +18,9 @@ def separate_in_tec_men_phys(df):
 
 def fill_color_df(df, color_df, quantile_dfs):
     pass
-def deal_with_fuzzy_attrs(field):
-    if '-' in field:
+def deal_with_fuzzy_attrs(i, field):
+
+    if i > 0 and '-' in field:
         first, lst = field.split('-')
         if first.isdigit() and lst.isdigit():
             return round((float(first) + float(lst)) / 2, 2)
@@ -50,7 +51,7 @@ def parse_attr_list(basedir, overwrite=True):
             line = line.strip().replace(" - Pick Player ", "").strip('|')
 
             cleaned_line = [x.strip() for x in line.split('|')]
-            cleaned_line = [deal_with_fuzzy_attrs(x) for x in cleaned_line]
+            cleaned_line = [deal_with_fuzzy_attrs(i, x) for i, x in enumerate(cleaned_line)]
             cleaned_data.append(cleaned_line)
         df = pd.DataFrame(cleaned_data, columns=columns)
         pos_df = df[["Player", "UID", "Position"]].copy()
