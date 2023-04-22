@@ -60,12 +60,12 @@ def read_image(image_path, process_method, custom_config):
     return text
 
 
-#d2_text = read_image(image_path="/Users/diego/projects/ocr-with-tesseract/images/d2.JPG", process_method=process_image,
-#                      custom_config=r"--psm 6 -c tessedit_char_whitelist=0123456789 -c load_system_dawg=0 -c load_freq_dawg=0")
+d2_text = read_image(image_path="images/d2.JPG", process_method=process_image,
+                      custom_config=r"--psm 6 -c tessedit_char_whitelist=0123456789 -c load_system_dawg=0 -c load_freq_dawg=0")
 
-d1_text = read_image(image_path="/Users/diego/projects/ocr-with-tesseract/images/d1.JPG", process_method=process_image_gray,
+d1_text = read_image(image_path="images/d1.JPG", process_method=process_image_gray,
                       custom_config=r"--psm 6  -c tessedit_char_whitelist=GKDCRLMSTA1234567 -c load_system_dawg=0 -c load_freq_dawg=0")
 
 
-#print(d2_text)
-#print(d1_text)
+print(d2_text)
+print(d1_text)
