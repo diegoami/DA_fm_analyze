@@ -1,0 +1,12 @@
+.row {
+    display: flex;
+    margin-bottom: 15px;
+}
+
+.sixcolumns {
+    flex-basis: 50%;
+    margin-left: 20px;
+    margin-right: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
