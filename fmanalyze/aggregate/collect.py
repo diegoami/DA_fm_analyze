@@ -1,12 +1,9 @@
 import pandas
 
-from fmanalyze.attrs.abilities import split_abilities, create_abilities
-from fmanalyze.attrs.instructions import build_instrs
-from fmanalyze.attrs.main_attrs import separate_in_tec_men_phys, parse_attr_list
-from fmanalyze.attrs.octs import create_octs, create_gk_octs
-from fmanalyze.attrs.positions import calculate_weighted_sum, weights
-from fmanalyze.attrs.roles import create_all_roles
-from fmanalyze.roles.extract import evaluate_positions, extract_roles, extract_match_roles
+from fmanalyze.aggregate.color import create_color_roles_dfs, fill_color_dfs
+from fmanalyze.attrs.abilities import split_abilities
+from fmanalyze.attrs.main_attrs import separate_in_tec_men_phys
+from fmanalyze.roles.formation import read_formation
 
 
 def fill_all_dfs(all_dfs, basedir, formation_df=None):
@@ -38,14 +35,17 @@ def fill_all_dfs(all_dfs, basedir, formation_df=None):
         else:
             all_dfs[key] = df[df['Position'] != 'GK']
 
-def create_dfs_for_basedir(basedir, overwrite=True):
-    df, pos_df = parse_attr_list(basedir, overwrite=overwrite)
-    octs_df = create_octs(basedir, df)
-    gk_octs_df = create_gk_octs(basedir, df)
-    all_roles_df = create_all_roles(basedir, df)
-    wsums_df = calculate_weighted_sum(basedir, df, weights)
-    evaluate_positions(basedir, pos_df, wsums_df)
-    abis_df = create_abilities(basedir, df)
-    instrs = build_instrs(basedir, df)
-    extract_roles(basedir, pos_df)
-    extract_match_roles(basedir)
+
+def create_formation_dfs(teamdir, rivaldir, quantilesdir, formation, rivalformation, own_all_dfs, color_dfs, rival_all_dfs, rival_color_dfs):
+    formation_df, formation_rival_df = None, None
+    # all_csvs = ['octs', 'gk_octs']
+    if formation:
+        formation_df = read_formation(teamdir, formation)
+        if rivalformation is not None:
+            formation_rival_df = read_formation(rivaldir, rivalformation)
+    color_roles_dfs = create_color_roles_dfs(quantilesdir)
+    fill_all_dfs(own_all_dfs, teamdir, formation_df)
+    fill_color_dfs(color_dfs, own_all_dfs, color_roles_dfs)
+    if rivaldir is not None:
+        fill_all_dfs(rival_all_dfs, rivaldir, formation_rival_df)
+        fill_color_dfs(rival_color_dfs, rival_all_dfs, color_roles_dfs)

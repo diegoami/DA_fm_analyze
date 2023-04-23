@@ -1,7 +1,7 @@
 import argparse
 import os
 
-from fmanalyze.aggregate.collect import create_dfs_for_basedir
+from fmanalyze.aggregate.main import create_dfs_for_basedir
 from fmanalyze.attrs.instructions import *
 
 pd.options.mode.chained_assignment = None
