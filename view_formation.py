@@ -28,7 +28,7 @@ server = Flask(__name__)
 # Create the first Dash app
 
 
-app_squads = dash.Dash(__name__, server=server, url_base_pathname='/squads/')
+app_formations = dash.Dash(__name__, server=server, url_base_pathname='/formations/')
 app_config = dash.Dash(__name__, server=server, url_base_pathname='/config/')
 
 
@@ -50,11 +50,11 @@ def index():
 )
 def on_button_click(n_clicks):
     if int(n_clicks) > 0:  # Cast n_clicks to an integer
-        return '/squads'
+        return '/formations'
     return dash.no_update
 
 
-@app_squads.callback(Output('tab-content', 'children'), [Input('tabs', 'value')])
+@app_formations.callback(Output('tab-content', 'children'), [Input('tabs', 'value')])
 def render_content(tab):
     color_df = color_dfs[f'{tab}_color']
     df = own_all_dfs[tab]
@@ -98,11 +98,12 @@ def reload():
     teamdir, rivaldir = os.path.join(basedir, 'teams', teamname), os.path.join(basedir, 'teams',
                                                                                rivalname) if rivalname else None
     quantilesdir = os.path.join(basedir, 'quantiles')
-    formation = config.get("formation", None)
-    create_formation_dfs(teamdir, rivaldir, quantilesdir, formation, None,
-                         own_all_dfs, color_dfs, None, None)
+    formation, rivalformation = config.get("formation", None), config.get("rivalformation", None)
+    league_dir = os.path.dirname(basedir)
+    create_formation_dfs(teamdir, rivaldir, quantilesdir, formation, rivalformation,
+                         own_all_dfs, color_dfs, rival_all_dfs, rival_color_dfs)
     # Define the layout of the app
-    app_squads.layout = html.Div([
+    app_formations.layout = html.Div([
         dcc.Tabs(id='tabs', value='octs', children=[
             dcc.Tab(label=name, value=name, className='custom-tab',
                     selected_className='custom-tab--selected') for name in own_all_dfs.keys()
@@ -115,13 +116,18 @@ def reload():
 
 def create_config_layout():
     basedir, teamname, rivalname = config["basedir"], config["team"], config.get("rival", None)
-    teamdir = os.path.join(basedir, 'teams', teamname)
+    teamdir, rivaldir = os.path.join(basedir, 'teams', teamname), os.path.join(basedir, 'teams',
+                                                                               rivalname) if rivalname else None
 
     team_dict = read_full_formation(teamdir, 'full_formation.csv')
-    #columns = create_player_columns(team_dict, 'own')
+    rival_dict = read_full_formation(rivaldir, 'full_formation.csv')
+    columns = create_player_columns(team_dict, 'own')
+    rival_columns = create_player_columns(rival_dict, 'rival')
     return html.Div([
         html.H1('Config'),
-       # html.Div(columns, className='row'),
+        html.Div(columns, className='row'),
+        html.H1('Rival Config'),
+        html.Div(rival_columns, className='row'),
         html.Button('Submit', id='submit-button', n_clicks=0),
         dcc.Location(id='redirect', refresh=True)
     ])
