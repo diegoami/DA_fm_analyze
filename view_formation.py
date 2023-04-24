@@ -40,7 +40,7 @@ rival_color_dfs = {}
 
 @server.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('formation_index.html')
 
 
 

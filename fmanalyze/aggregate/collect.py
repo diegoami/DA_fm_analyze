@@ -30,15 +30,21 @@ def fill_all_dfs(all_dfs, basedir, formation_df=None):
         if 'Position' in df.columns:
             temp_column = df.pop('Position')
             df.insert(0, 'Position', temp_column)
-        if 'gk' in key:
-            all_dfs[key] = df[df['Position'] == 'GK']
-        else:
-            all_dfs[key] = df[df['Position'] != 'GK']
+#        if 'gk' in key:
+#            all_dfs[key] = df[df['Position'] == 'GK']
+#        else:
+#            all_dfs[key] = df[df['Position'] != 'GK']
+
+
+def create_full_formation_dfs(teamdir, quantilesdir, own_all_dfs, color_dfs):
+    formation_df = read_formation(teamdir, 'full_formation.csv', full_formation=True)
+    color_roles_dfs = create_color_roles_dfs(quantilesdir)
+    fill_all_dfs(own_all_dfs, teamdir, formation_df)
+    fill_color_dfs(color_dfs, own_all_dfs, color_roles_dfs)
 
 
 def create_formation_dfs(teamdir, rivaldir, quantilesdir, formation, rivalformation, own_all_dfs, color_dfs, rival_all_dfs, rival_color_dfs):
     formation_df, formation_rival_df = None, None
-    # all_csvs = ['octs', 'gk_octs']
     if formation:
         formation_df = read_formation(teamdir, formation)
         if rivalformation is not None:

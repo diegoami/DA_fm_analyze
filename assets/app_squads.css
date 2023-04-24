@@ -1,0 +1,19 @@
+/* Define styles for the Tabs component */
+.custom-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #d6d6d6;
+  padding: 6px;
+  font-family: Arial, sans-serif;
+}
+
+.custom-tabs .custom-tab {
+  margin-right: 10px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.custom-tabs .custom-tab--selected {
+  color: white;
+  background-color: #0074D9;
+}

@@ -5,7 +5,7 @@ import argparse
 import yaml
 import pandas as pd
 
-from fmanalyze.aggregate.collect import create_formation_dfs
+from fmanalyze.aggregate.collect import create_full_formation_dfs
 import os
 
 from dash.dependencies import Input, Output, State
@@ -16,16 +16,11 @@ from dash.dependencies import Input, Output
 
 
 import dash_html_components as html
-from flask import Flask, render_template_string, render_template
+from flask import Flask, render_template
 
 
 config = None
-# Create a Flask app
 server = Flask(__name__)
-
-# Define the index route
-
-# Create the first Dash app
 
 
 app_squads = dash.Dash(__name__, server=server, url_base_pathname='/squads/')
@@ -34,13 +29,11 @@ app_config = dash.Dash(__name__, server=server, url_base_pathname='/config/')
 
 
 own_all_dfs = {}
-rival_all_dfs = {}
 color_dfs = {}
-rival_color_dfs = {}
 
 @server.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('squad_index.html')
 
 
 
@@ -65,29 +58,10 @@ def render_content(tab):
     # Create the DataTable for df
     table_df = create_fm_data_table(df, style_conditions)
 
-
-    if rival_all_dfs:
-        rival_df = rival_all_dfs[tab]
-        rival_color_df = rival_color_dfs[f'{tab}_color']
-        rival_style_conditions = fill_style_conditions(rival_color_df, tab)
-
-        # Create the DataTable for rival_df
-        table_rival_df = create_fm_data_table(rival_df, rival_style_conditions)
-        return html.Div([
-            html.Div([
-                html.H4('Own Data'),
-                table_df
-            ]),
-            html.Div([
-                html.H4('Rival Data'),
-                table_rival_df
-            ])
-        ])
-    else:
-        return html.Div([
-            html.H4('Own Data'),
-            table_df
-        ])
+    return html.Div([
+        html.H4('Own Data'),
+        table_df
+    ])
 
 
 
@@ -95,12 +69,9 @@ def render_content(tab):
 
 def reload():
     basedir, teamname, rivalname = config["basedir"], config["team"], config.get("rival", None)
-    teamdir, rivaldir = os.path.join(basedir, 'teams', teamname), os.path.join(basedir, 'teams',
-                                                                               rivalname) if rivalname else None
+    teamdir = os.path.join(basedir, 'teams', teamname)
     quantilesdir = os.path.join(basedir, 'quantiles')
-    formation = config.get("formation", None)
-    create_formation_dfs(teamdir, rivaldir, quantilesdir, formation, None,
-                         own_all_dfs, color_dfs, None, None)
+    create_full_formation_dfs(teamdir, quantilesdir, own_all_dfs, color_dfs)
     # Define the layout of the app
     app_squads.layout = html.Div([
         dcc.Tabs(id='tabs', value='octs', children=[
@@ -127,22 +98,15 @@ def create_config_layout():
     ])
 
 
-def create_player_columns(team_dict, prefix='own'):
+def create_player_columns(prefix='own'):
     columns = []
-    for index in range(1, 12):
-        columns.append(html.Div([
+    columns.append(html.Div([
             html.Label(f'Role {index}'),
             dcc.Dropdown(
                 id=f'{prefix}-role{index}-dropdown',
                 options=[{'label': value, 'value': value} for value in
                          ['GK', 'DR', 'DC', 'DL', 'WBR', 'DM', 'WBL', 'MR', 'MC', 'ML', 'AMR', 'AMC', 'AML', 'STC']]
             ),
-            html.Label(f'Player {index}'),
-            dcc.Dropdown(
-                id=f'{prefix}-player{index}-dropdown',
-                options=[{'label': player, 'value': uid} for uid, player in team_dict.items()]
-            )
-
         ], className='sixcolumns'))
     return columns
 

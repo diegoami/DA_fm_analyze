@@ -43,12 +43,16 @@ def read_full_formation(formation_dir, formation_file):
     result_dict = {k: v for k, v in zip(fdata['UID'], fdata['Player'])}
     return result_dict
 
-def read_formation(formation_dir, formation_file):
+def read_formation(formation_dir, formation_file, full_formation = False):
     formation_full_file = os.path.join(formation_dir, formation_file)
     with open(formation_full_file, 'r', encoding='UTF-8') as file:
         lines = file.readlines()
+    if full_formation:
+        filtered_lines = [line.replace('#','') for line in lines]
 
-    filtered_lines = [line for line in lines if not line.startswith('#')]
+    else:
+        filtered_lines = [line for line in lines if not line.startswith('#')]
+
     data = pd.read_csv(io.StringIO(''.join(filtered_lines)))
     if 'Match' in data.columns:
 #        data.drop(columns=['Position'], inplace=True)

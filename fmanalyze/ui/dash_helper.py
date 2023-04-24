@@ -9,7 +9,7 @@ def fill_style_conditions(color_df, tab):
             if col not in ['Player', 'UID', 'Position']:
                 content = row[col]
                 style_conditions.append({
-                    'if': {'row_index': index-1 if tab != 'gk_octs' else index, 'column_id': col},
+                    'if': {'row_index': index, 'column_id': col},
                     'backgroundColor': color_map[content],
                 })
     return style_conditions
