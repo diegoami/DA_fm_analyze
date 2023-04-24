@@ -39,10 +39,12 @@ def index():
 
 @app_config.callback(
     Output('redirect', 'pathname'),
-    [Input('submit-button', 'n_clicks')]
+    [Input('submit-button', 'n_clicks')],
+    [State('role-dropdown', 'value')]
 )
-def on_button_click(n_clicks):
+def on_button_click(n_clicks, value):
     if int(n_clicks) > 0:  # Cast n_clicks to an integer
+        reload(value)
         return '/squads'
     return dash.no_update
 
@@ -67,11 +69,11 @@ def render_content(tab):
 
 
 
-def reload():
+def reload(value = None):
     basedir, teamname, rivalname = config["basedir"], config["team"], config.get("rival", None)
     teamdir = os.path.join(basedir, 'teams', teamname)
     quantilesdir = os.path.join(basedir, 'quantiles')
-    create_full_formation_dfs(teamdir, quantilesdir, own_all_dfs, color_dfs)
+    create_full_formation_dfs(teamdir, quantilesdir, own_all_dfs, color_dfs, selected_role=value)
     # Define the layout of the app
     app_squads.layout = html.Div([
         dcc.Tabs(id='tabs', value='octs', children=[
@@ -89,21 +91,21 @@ def create_config_layout():
     teamdir = os.path.join(basedir, 'teams', teamname)
 
     team_dict = read_full_formation(teamdir, 'full_formation.csv')
-    #columns = create_player_columns(team_dict, 'own')
+    columns = create_role_columns()
     return html.Div([
         html.H1('Config'),
-       # html.Div(columns, className='row'),
+        html.Div(columns, className='row'),
         html.Button('Submit', id='submit-button', n_clicks=0),
         dcc.Location(id='redirect', refresh=True)
     ])
 
 
-def create_player_columns(prefix='own'):
+def create_role_columns():
     columns = []
     columns.append(html.Div([
-            html.Label(f'Role {index}'),
+            html.Label(f'Role '),
             dcc.Dropdown(
-                id=f'{prefix}-role{index}-dropdown',
+                id=f'role-dropdown',
                 options=[{'label': value, 'value': value} for value in
                          ['GK', 'DR', 'DC', 'DL', 'WBR', 'DM', 'WBL', 'MR', 'MC', 'ML', 'AMR', 'AMC', 'AML', 'STC']]
             ),
@@ -120,6 +122,6 @@ if __name__ == '__main__':
         config = yaml.safe_load(confhandle)
 
     app_config.layout = create_config_layout()
-    reload()
+    reload('DC')
 
     server.run(debug=True)

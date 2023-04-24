@@ -6,7 +6,7 @@ from fmanalyze.attrs.main_attrs import separate_in_tec_men_phys
 from fmanalyze.roles.formation import read_formation
 
 
-def fill_all_dfs(all_dfs, basedir, formation_df=None):
+def fill_all_dfs(all_dfs, basedir, formation_df=None, selected_role=None):
     all_octs = pandas.read_csv(f'{basedir}/octs.csv')
     all_gk_octs = pandas.read_csv(f'{basedir}/gk_octs.csv')
     all_attrs = pandas.read_csv(f'{basedir}/all_attrs.csv')
@@ -20,7 +20,11 @@ def fill_all_dfs(all_dfs, basedir, formation_df=None):
             columns={'Player_x': 'Player'})
         all_gk_octs = formation_df.merge(all_gk_octs, on='UID', how='inner').drop(columns=['Player_y']).rename(
             columns={'Player_x': 'Player'})
-
+    if selected_role is not None:
+        all_attrs = all_attrs[all_attrs['Position'] == selected_role]
+        all_abilities = all_abilities[all_abilities['Position'] == selected_role]
+        all_octs = all_octs[all_octs['Position'] == selected_role]
+        all_gk_octs = all_gk_octs[all_gk_octs['Position'] == selected_role]
 
     all_dfs['octs'] = all_octs
     all_dfs['gk_octs'] = all_gk_octs
@@ -36,11 +40,12 @@ def fill_all_dfs(all_dfs, basedir, formation_df=None):
 #            all_dfs[key] = df[df['Position'] != 'GK']
 
 
-def create_full_formation_dfs(teamdir, quantilesdir, own_all_dfs, color_dfs):
-    formation_df = read_formation(teamdir, 'full_formation.csv', full_formation=True)
-    color_roles_dfs = create_color_roles_dfs(quantilesdir)
-    fill_all_dfs(own_all_dfs, teamdir, formation_df)
-    fill_color_dfs(color_dfs, own_all_dfs, color_roles_dfs)
+def create_full_formation_dfs(teamdir, quantilesdir, own_all_dfs, color_dfs, selected_role=None):
+    formation_df = read_formation(teamdir, 'full_formation.csv', full_formation=True, selected_role=selected_role)
+    color_roles_dfs = create_color_roles_dfs(quantilesdir, selected_role=selected_role)
+    fill_all_dfs(own_all_dfs, teamdir, formation_df, selected_role)
+    fill_color_dfs(color_dfs, own_all_dfs, color_roles_dfs, selected_role)
+
 
 
 def create_formation_dfs(teamdir, rivaldir, quantilesdir, formation, rivalformation, own_all_dfs, color_dfs, rival_all_dfs, rival_color_dfs):

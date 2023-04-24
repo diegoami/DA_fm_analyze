@@ -43,7 +43,7 @@ def read_full_formation(formation_dir, formation_file):
     result_dict = {k: v for k, v in zip(fdata['UID'], fdata['Player'])}
     return result_dict
 
-def read_formation(formation_dir, formation_file, full_formation = False):
+def read_formation(formation_dir, formation_file, full_formation = False, selected_role = None):
     formation_full_file = os.path.join(formation_dir, formation_file)
     with open(formation_full_file, 'r', encoding='UTF-8') as file:
         lines = file.readlines()
@@ -58,6 +58,8 @@ def read_formation(formation_dir, formation_file, full_formation = False):
 #        data.drop(columns=['Position'], inplace=True)
         data.rename(columns={'Match': 'Position'}, inplace=True)
     data.sort_values(by=['Position'], inplace=True, key=lambda x: x.map(sort_positions))
+    if selected_role is not None:
+        data = data[data['Position'] == selected_role]
     return data
 
 def save_formation(basedir, df):
