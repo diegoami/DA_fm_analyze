@@ -43,13 +43,18 @@ def index():
     return render_template('formation_index.html')
 
 
+num_comboboxes = 44
+combobox_names = [f'own-role{index}-dropdown' for index in range(1,12)] + [f'own-player{index}-dropdown' for index in range(1,12)] + [f'rival-role{index}-dropdown' for index in range(1,12)] + [f'rival-player{index}-dropdown' for index in range(1,12)]
 
 @app_config.callback(
     Output('redirect', 'pathname'),
-    [Input('submit-button', 'n_clicks')]
+    [Input('submit-button', 'n_clicks')],
+    [State(combobox_name, 'value') for combobox_name in combobox_names]
 )
-def on_button_click(n_clicks):
+def on_button_click(n_clicks, *args):
     if int(n_clicks) > 0:  # Cast n_clicks to an integer
+        print(num_comboboxes)
+        print(args)
         return '/formations'
     return dash.no_update
 
