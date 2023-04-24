@@ -122,6 +122,6 @@ if __name__ == '__main__':
         config = yaml.safe_load(confhandle)
 
     app_config.layout = create_config_layout()
-    reload('DC')
+    reload()
 
     server.run(debug=True)
