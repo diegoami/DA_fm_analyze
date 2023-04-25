@@ -10,7 +10,7 @@ import os
 
 from dash.dependencies import Input, Output, State
 
-from fmanalyze.roles.formation import read_full_formation
+from fmanalyze.roles.formation import read_formation_for_select
 from fmanalyze.ui.dash_helper import fill_style_conditions, create_fm_data_table
 from dash.dependencies import Input, Output
 
@@ -90,7 +90,7 @@ def create_config_layout():
     basedir, teamname, rivalname = config["basedir"], config["team"], config.get("rival", None)
     teamdir = os.path.join(basedir, 'teams', teamname)
 
-    team_dict = read_full_formation(teamdir, 'full_formation.csv')
+    team_dict = read_formation_for_select(teamdir, 'full_formation.csv')
     columns = create_role_columns()
     return html.Div([
         html.H1('Config'),

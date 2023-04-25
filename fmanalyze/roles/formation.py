@@ -34,7 +34,7 @@ def parse_selection(basedir):
     return df
 
 
-def read_full_formation(formation_dir, formation_file):
+def read_formation_for_select(formation_dir, formation_file ='full_formation.csv'):
     formation_full_file = os.path.join(formation_dir, formation_file)
     data = pd.read_csv(formation_full_file)
     fdata = data[['Player', 'UID']].drop_duplicates()
@@ -43,7 +43,7 @@ def read_full_formation(formation_dir, formation_file):
     result_dict = {k: v for k, v in zip(fdata['UID'], fdata['Player'])}
     return result_dict
 
-def read_formation(formation_dir, formation_file, full_formation = False, selected_role = None):
+def read_formation(formation_dir, formation_file = 'full_formation.csv', full_formation = False, selected_role = None):
     formation_full_file = os.path.join(formation_dir, formation_file)
     with open(formation_full_file, 'r', encoding='UTF-8') as file:
         lines = file.readlines()

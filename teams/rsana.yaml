@@ -1,5 +1,3 @@
 basedir: "/Users/diego/projects/DA_fm_data/laliga/"
 team: "rsana"
-formation: "formation.csv"
-rival: "valencia"
-rivalformation: "formation.csv"
+rival: "barc"

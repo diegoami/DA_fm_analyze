@@ -3,7 +3,7 @@ import pandas
 from fmanalyze.aggregate.color import create_color_roles_dfs, fill_color_dfs
 from fmanalyze.attrs.abilities import split_abilities
 from fmanalyze.attrs.main_attrs import separate_in_tec_men_phys
-from fmanalyze.roles.formation import read_formation
+from fmanalyze.roles.formation import read_formation, read_formation_for_select
 
 
 def fill_all_dfs(all_dfs, basedir, formation_df=None, selected_role=None):
@@ -52,8 +52,15 @@ def create_formation_dfs(teamdir, rivaldir, quantilesdir, formation, rivalformat
     formation_df, formation_rival_df = None, None
     if formation:
         formation_df = read_formation(teamdir, formation)
+    else:
+        formation_df = read_formation(teamdir, full_formation=True)
+    if rivaldir is not None:
         if rivalformation is not None:
             formation_rival_df = read_formation(rivaldir, rivalformation)
+        else:
+            formation_rival_df = read_formation(rivaldir, full_formation=True)
+
+
     color_roles_dfs = create_color_roles_dfs(quantilesdir)
     fill_all_dfs(own_all_dfs, teamdir, formation_df)
     fill_color_dfs(color_dfs, own_all_dfs, color_roles_dfs)

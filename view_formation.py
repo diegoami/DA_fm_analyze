@@ -10,7 +10,7 @@ import os
 
 from dash.dependencies import Input, Output, State
 
-from fmanalyze.roles.formation import read_full_formation
+from fmanalyze.roles.formation import read_formation_for_select
 from fmanalyze.ui.dash_helper import fill_style_conditions, create_fm_data_table
 from dash.dependencies import Input, Output
 
@@ -53,11 +53,22 @@ combobox_names = [f'own-role{index}-dropdown' for index in range(1,12)] + [f'own
 )
 def on_button_click(n_clicks, *args):
     if int(n_clicks) > 0:  # Cast n_clicks to an integer
-        print(num_comboboxes)
-        print(args)
+
+        own_formation = create_formation_df(args[:11], args[11:22])
+        rival_formation = create_formation_df(args[22:33], args[33:])
         return '/formations'
     return dash.no_update
 
+
+def create_formation_df(positions, uids):
+    df = pd.DataFrame(columns=['Position', 'UID'])
+    df['Position'] = positions
+    df['UID'] = uids
+    df['UID'] = df['UID'].astype('str')
+    return df
+
+def process_formation():
+    pass
 
 @app_formations.callback(Output('tab-content', 'children'), [Input('tabs', 'value')])
 def render_content(tab):
@@ -98,7 +109,7 @@ def render_content(tab):
 
 
 
-def reload():
+def reload(own_formation = None, rival_formation = None):
     basedir, teamname, rivalname = config["basedir"], config["team"], config.get("rival", None)
     teamdir, rivaldir = os.path.join(basedir, 'teams', teamname), os.path.join(basedir, 'teams',
                                                                                rivalname) if rivalname else None
@@ -124,8 +135,8 @@ def create_config_layout():
     teamdir, rivaldir = os.path.join(basedir, 'teams', teamname), os.path.join(basedir, 'teams',
                                                                                rivalname) if rivalname else None
 
-    team_dict = read_full_formation(teamdir, 'full_formation.csv')
-    rival_dict = read_full_formation(rivaldir, 'full_formation.csv')
+    team_dict = read_formation_for_select(teamdir, 'full_formation.csv')
+    rival_dict = read_formation_for_select(rivaldir, 'full_formation.csv')
     columns = create_player_columns(team_dict, 'own')
     rival_columns = create_player_columns(rival_dict, 'rival')
     return html.Div([
