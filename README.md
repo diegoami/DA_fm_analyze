@@ -3,9 +3,8 @@
 ## COMPANION DATA PROJECT   
 To check the data structure see the companion project [here](https://github.com/diegoami/DA_fm_data)
 
-## STEPS
 
-### IMPORT DATA
+## IMPORT DATA
 
 1. Import the view `fmf/Important_Attrs_Pos.fmf` into Football Manager
 2. Export the stats of your team and your team into your league
@@ -14,7 +13,14 @@ To check the data structure see the companion project [here](https://github.com/
 5. Run `python3 combine_dfs.py -c leagues/laliga.yml -t` to generate dataset of all players that can play in a roles, that will be put into the `roles` subdirectory of the `targetdir` you specified in the yaml file
 6. Run `python3 save_quantiles.py -c leagues/laliga.yml -p` to generate the quantiles for all the attributes, that will be put into the `quantiles` subdirectory of the `targetdir` you specified in the yaml file
 
-### VIEWING YOUR SQUAD
+## AVAILABLE APPLICATIONS
+
+There are two application that you can start to analyze your squad and the squad of your rival team
+
+* `view_squad.py` to analyze your squad
+* `view_formation.py` to analyze a formation
+
+## VIEWING YOUR SQUAD
 
 1. Create a yaml file with the name of the team you want to analyze, as an example check `teams/rsana.yml`
 2. Find the `full_formation.csv` file of your team that will be in the `teams` subdirectory of the `targetdir` you specified in the yaml file. It will contain all possible position for your squad, but all lines are commented out
@@ -22,3 +28,4 @@ To check the data structure see the companion project [here](https://github.com/
 4. Define your rival team in the `rival` field of the yaml file
 5. Find the `full_formation.csv` file of your rival team and execute the same operation as in the previous step
 6. Run `python3 view_squad.py -c teams/rsana.yml` to visualize the analysis for your team as a dash application
+VIEWING A FORMATION

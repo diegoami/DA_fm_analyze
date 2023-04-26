@@ -109,12 +109,15 @@ def reload(own_formation = None, rival_formation = None):
     league_dir = os.path.dirname(basedir)
     if own_formation is not None and rival_formation is not None:
         formation_df, formation_rival_df = own_formation, rival_formation
+        own_formation.to_csv(os.path.join(teamdir, 'formation_current.csv'), index=False)
+        rival_formation.to_csv(os.path.join(rivaldir, 'formation_current.csv'), index=False)
     else:
         formation_df, formation_rival_df = read_formations(teamdir, formation, rivaldir, rivalformation)
+
     create_formation_dfs(teamdir, rivaldir, quantilesdir, formation_df, formation_rival_df,
                          own_all_dfs, color_dfs, rival_all_dfs, rival_color_dfs)
     # Define the layout of the app
-    create_formation_layout()
+    app_formations.layout = create_formation_layout()
 
 
 def create_formation_layout():
@@ -176,6 +179,5 @@ if __name__ == '__main__':
 
     app_config.layout = create_config_layout()
     app_formations.layout = create_formation_layout()
-   # reload()
 
     server.run(debug=True)
