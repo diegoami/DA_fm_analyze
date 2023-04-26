@@ -114,7 +114,11 @@ def reload(own_formation = None, rival_formation = None):
     create_formation_dfs(teamdir, rivaldir, quantilesdir, formation_df, formation_rival_df,
                          own_all_dfs, color_dfs, rival_all_dfs, rival_color_dfs)
     # Define the layout of the app
-    app_formations.layout = html.Div([
+    create_formation_layout()
+
+
+def create_formation_layout():
+    return html.Div([
         dcc.Tabs(id='tabs', value='octs', children=[
             dcc.Tab(label=name, value=name, className='custom-tab',
                     selected_className='custom-tab--selected') for name in own_all_dfs.keys()
@@ -171,6 +175,7 @@ if __name__ == '__main__':
         config = yaml.safe_load(confhandle)
 
     app_config.layout = create_config_layout()
-    reload()
+    app_formations.layout = create_formation_layout()
+   # reload()
 
     server.run(debug=True)
