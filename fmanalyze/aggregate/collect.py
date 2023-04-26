@@ -12,14 +12,10 @@ def fill_all_dfs(all_dfs, basedir, formation_df=None, selected_role=None):
     all_attrs = pandas.read_csv(f'{basedir}/all_attrs.csv')
     all_abilities = pandas.read_csv(f'{basedir}/abis.csv')
     if formation_df is not None:
-        all_attrs = formation_df.merge(all_attrs, on='UID', how='inner').drop(columns=['Player_y']).rename(
-            columns={'Player_x': 'Player'})
-        all_abilities = formation_df.merge(all_abilities, on='UID', how='inner').drop(columns=['Player_y']).rename(
-            columns={'Player_x': 'Player'})
-        all_octs = formation_df.merge(all_octs, on='UID', how='inner').drop(columns=['Player_y']).rename(
-            columns={'Player_x': 'Player'})
-        all_gk_octs = formation_df.merge(all_gk_octs, on='UID', how='inner').drop(columns=['Player_y']).rename(
-            columns={'Player_x': 'Player'})
+        all_attrs = form_merge(all_attrs, formation_df)
+        all_abilities = form_merge(all_abilities, formation_df)
+        all_octs = form_merge(all_octs, formation_df)
+        all_gk_octs = form_merge(all_gk_octs, formation_df)
     if selected_role is not None:
         all_attrs = all_attrs[all_attrs['Position'] == selected_role]
         all_abilities = all_abilities[all_abilities['Position'] == selected_role]
@@ -34,6 +30,15 @@ def fill_all_dfs(all_dfs, basedir, formation_df=None, selected_role=None):
         if 'Position' in df.columns:
             temp_column = df.pop('Position')
             df.insert(0, 'Position', temp_column)
+
+
+def form_merge(ref_df, formation_df):
+    ref_df = formation_df.merge(ref_df, on='UID', how='inner')
+    if 'Player_y' in ref_df.columns:
+        ref_df =ref_df.drop(columns=['Player_y']).rename(columns={'Player_x': 'Player'})
+    return ref_df
+
+
 #        if 'gk' in key:
 #            all_dfs[key] = df[df['Position'] == 'GK']
 #        else:
@@ -48,7 +53,17 @@ def create_full_formation_dfs(teamdir, quantilesdir, own_all_dfs, color_dfs, sel
 
 
 
-def create_formation_dfs(teamdir, rivaldir, quantilesdir, formation, rivalformation, own_all_dfs, color_dfs, rival_all_dfs, rival_color_dfs):
+def create_formation_dfs(teamdir, rivaldir, quantilesdir, formation_df, formation_rival_df, own_all_dfs, color_dfs, rival_all_dfs, rival_color_dfs):
+
+    color_roles_dfs = create_color_roles_dfs(quantilesdir)
+    fill_all_dfs(own_all_dfs, teamdir, formation_df)
+    fill_color_dfs(color_dfs, own_all_dfs, color_roles_dfs)
+    if rivaldir is not None:
+        fill_all_dfs(rival_all_dfs, rivaldir, formation_rival_df)
+        fill_color_dfs(rival_color_dfs, rival_all_dfs, color_roles_dfs)
+
+
+def read_formations(teamdir, formation, rivaldir, rivalformation):
     formation_df, formation_rival_df = None, None
     if formation:
         formation_df = read_formation(teamdir, formation)
@@ -59,11 +74,4 @@ def create_formation_dfs(teamdir, rivaldir, quantilesdir, formation, rivalformat
             formation_rival_df = read_formation(rivaldir, rivalformation)
         else:
             formation_rival_df = read_formation(rivaldir, full_formation=True)
-
-
-    color_roles_dfs = create_color_roles_dfs(quantilesdir)
-    fill_all_dfs(own_all_dfs, teamdir, formation_df)
-    fill_color_dfs(color_dfs, own_all_dfs, color_roles_dfs)
-    if rivaldir is not None:
-        fill_all_dfs(rival_all_dfs, rivaldir, formation_rival_df)
-        fill_color_dfs(rival_color_dfs, rival_all_dfs, color_roles_dfs)
+    return formation_df, formation_rival_df

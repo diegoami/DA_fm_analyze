@@ -4,28 +4,19 @@ from dash import dcc
 import argparse
 import yaml
 import pandas as pd
-
-from fmanalyze.aggregate.collect import create_formation_dfs
+from fmanalyze.aggregate.collect import create_formation_dfs, read_formations
 import os
-
 from dash.dependencies import Input, Output, State
-
 from fmanalyze.roles.formation import read_formation_for_select
 from fmanalyze.ui.dash_helper import fill_style_conditions, create_fm_data_table
 from dash.dependencies import Input, Output
-
-
 import dash_html_components as html
-from flask import Flask, render_template_string, render_template
+from flask import Flask, render_template
 
 
 config = None
 # Create a Flask app
 server = Flask(__name__)
-
-# Define the index route
-
-# Create the first Dash app
 
 
 app_formations = dash.Dash(__name__, server=server, url_base_pathname='/formations/')
@@ -42,12 +33,12 @@ rival_color_dfs = {}
 def index():
     return render_template('formation_index.html')
 
-
 num_comboboxes = 44
 combobox_names = [f'own-role{index}-dropdown' for index in range(1,12)] + [f'own-player{index}-dropdown' for index in range(1,12)] + [f'rival-role{index}-dropdown' for index in range(1,12)] + [f'rival-player{index}-dropdown' for index in range(1,12)]
 
 @app_config.callback(
-    Output('redirect', 'pathname'),
+    Output('redirect', 'href'),
+    Output('redirect', 'children'),
     [Input('submit-button', 'n_clicks')],
     [State(combobox_name, 'value') for combobox_name in combobox_names]
 )
@@ -56,15 +47,19 @@ def on_button_click(n_clicks, *args):
 
         own_formation = create_formation_df(args[:11], args[11:22])
         rival_formation = create_formation_df(args[22:33], args[33:])
-        return '/formations'
-    return dash.no_update
+        own_formation.dropna(inplace=True)
+        rival_formation.dropna(inplace=True)
+        reload(own_formation, rival_formation)
+        return '/formations', 'Open Formations'
+    return dash.no_update, dash.no_update
 
 
 def create_formation_df(positions, uids):
     df = pd.DataFrame(columns=['Position', 'UID'])
     df['Position'] = positions
     df['UID'] = uids
-    df['UID'] = df['UID'].astype('str')
+    df.dropna(inplace=True)
+    df['UID'] = df['UID'].astype('int64')
     return df
 
 def process_formation():
@@ -87,7 +82,6 @@ def render_content(tab):
         rival_color_df = rival_color_dfs[f'{tab}_color']
         rival_style_conditions = fill_style_conditions(rival_color_df, tab)
 
-        # Create the DataTable for rival_df
         table_rival_df = create_fm_data_table(rival_df, rival_style_conditions)
         return html.Div([
             html.Div([
@@ -106,9 +100,6 @@ def render_content(tab):
         ])
 
 
-
-
-
 def reload(own_formation = None, rival_formation = None):
     basedir, teamname, rivalname = config["basedir"], config["team"], config.get("rival", None)
     teamdir, rivaldir = os.path.join(basedir, 'teams', teamname), os.path.join(basedir, 'teams',
@@ -116,7 +107,11 @@ def reload(own_formation = None, rival_formation = None):
     quantilesdir = os.path.join(basedir, 'quantiles')
     formation, rivalformation = config.get("formation", None), config.get("rivalformation", None)
     league_dir = os.path.dirname(basedir)
-    create_formation_dfs(teamdir, rivaldir, quantilesdir, formation, rivalformation,
+    if own_formation is not None and rival_formation is not None:
+        formation_df, formation_rival_df = own_formation, rival_formation
+    else:
+        formation_df, formation_rival_df = read_formations(teamdir, formation, rivaldir, rivalformation)
+    create_formation_dfs(teamdir, rivaldir, quantilesdir, formation_df, formation_rival_df,
                          own_all_dfs, color_dfs, rival_all_dfs, rival_color_dfs)
     # Define the layout of the app
     app_formations.layout = html.Div([
@@ -126,8 +121,6 @@ def reload(own_formation = None, rival_formation = None):
         ]),
         html.Div(id='tab-content')
     ])
-
-
 
 
 def create_config_layout():
@@ -145,7 +138,7 @@ def create_config_layout():
         html.H1('Rival Config'),
         html.Div(rival_columns, className='row'),
         html.Button('Submit', id='submit-button', n_clicks=0),
-        dcc.Location(id='redirect', refresh=True)
+        html.A('', id='redirect', target='_blank')
     ])
 
 
