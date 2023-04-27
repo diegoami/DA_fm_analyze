@@ -105,15 +105,14 @@ def reload(own_formation = None, rival_formation = None):
     teamdir, rivaldir = os.path.join(basedir, 'teams', teamname), os.path.join(basedir, 'teams',
                                                                                rivalname) if rivalname else None
     quantilesdir = os.path.join(basedir, 'quantiles')
-    formation, rivalformation = config.get("formation", None), config.get("rival_formation", None)
-    save_formation, save_rivalformation = config.get("save_formation", 'formation_current.csv'), config.get('save_rival_formation', 'formation_current.csv')
-    league_dir = os.path.dirname(basedir)
+    load_formation, load_rival_formation = config.get("load_formation", None), config.get("load_rival_formation", None)
+    save_formation, save_rival_formation = config.get("save_formation", 'formation_current.csv'), config.get('save_rival_formation', 'formation_current.csv')
     if own_formation is not None and rival_formation is not None:
         formation_df, formation_rival_df = own_formation, rival_formation
         own_formation.to_csv(os.path.join(teamdir, save_formation), index=False)
-        rival_formation.to_csv(os.path.join(rivaldir, save_rivalformation), index=False)
+        rival_formation.to_csv(os.path.join(rivaldir, save_rival_formation), index=False)
     else:
-        formation_df, formation_rival_df = read_formations(teamdir, formation, rivaldir, rivalformation)
+        formation_df, formation_rival_df = read_formations(teamdir, load_formation, rivaldir, load_rival_formation)
 
     create_formation_dfs(teamdir, rivaldir, quantilesdir, formation_df, formation_rival_df,
                          own_all_dfs, color_dfs, rival_all_dfs, rival_color_dfs)
@@ -136,21 +135,26 @@ def create_config_layout():
     teamdir, rivaldir = os.path.join(basedir, 'teams', teamname), os.path.join(basedir, 'teams',
                                                                                rivalname) if rivalname else None
 
-    formation, rivalformation = config.get("formation", None), config.get("rival_formation", None)
-
+    load_formation, load_rival_formation = config.get("load_formation", None), config.get("load_rival_formation", None)
+    save_formation, save_rival_formation = config.get("save_formation", None), config.get("save_rival_formation", None)
 
     team_dict = read_formation_for_select(teamdir, 'full_squad.csv')
     rival_dict = read_formation_for_select(rivaldir, 'full_squad.csv')
-    if formation:
-        formation_lists = read_selected_formation(teamdir, formation)
-    if rivalformation:
-        rival_formation_lists = read_selected_formation(rivaldir, rivalformation)
+    if load_formation:
+        formation_lists = read_selected_formation(teamdir, load_formation)
+    if load_rival_formation:
+        rival_formation_lists = read_selected_formation(rivaldir, load_rival_formation)
     columns = create_player_columns(team_dict, 'own', formation_lists)
     rival_columns = create_player_columns(rival_dict, 'rival', rival_formation_lists)
+
+
+
     return html.Div([
         html.H1('Config'),
+        html.H2(f'Loaded from {load_formation},  saving to  {save_formation}'),
         html.Div(columns, className='row'),
         html.H1('Rival Config'),
+        html.H2(f'Loaded from {load_rival_formation}, saving to  {save_rival_formation}'),
         html.Div(rival_columns, className='row'),
         html.Button('Submit', id='submit-button', n_clicks=0),
         html.A('', id='redirect', target='_blank')
