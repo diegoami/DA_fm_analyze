@@ -7,7 +7,7 @@ import pandas as pd
 from fmanalyze.aggregate.collect import create_formation_dfs, read_formations
 import os
 from dash.dependencies import Input, Output, State
-from fmanalyze.roles.formation import read_formation_for_select
+from fmanalyze.roles.formation import read_formation_for_select, read_selected_formation
 from fmanalyze.ui.dash_helper import fill_style_conditions, create_fm_data_table
 from dash.dependencies import Input, Output
 import dash_html_components as html
@@ -105,12 +105,13 @@ def reload(own_formation = None, rival_formation = None):
     teamdir, rivaldir = os.path.join(basedir, 'teams', teamname), os.path.join(basedir, 'teams',
                                                                                rivalname) if rivalname else None
     quantilesdir = os.path.join(basedir, 'quantiles')
-    formation, rivalformation = config.get("formation", None), config.get("rivalformation", None)
+    formation, rivalformation = config.get("formation", None), config.get("rival_formation", None)
+    save_formation, save_rivalformation = config.get("save_formation", 'formation_current.csv'), config.get('save_rival_formation', 'formation_current.csv')
     league_dir = os.path.dirname(basedir)
     if own_formation is not None and rival_formation is not None:
         formation_df, formation_rival_df = own_formation, rival_formation
-        own_formation.to_csv(os.path.join(teamdir, 'formation_current.csv'), index=False)
-        rival_formation.to_csv(os.path.join(rivaldir, 'formation_current.csv'), index=False)
+        own_formation.to_csv(os.path.join(teamdir, save_formation), index=False)
+        rival_formation.to_csv(os.path.join(rivaldir, save_rivalformation), index=False)
     else:
         formation_df, formation_rival_df = read_formations(teamdir, formation, rivaldir, rivalformation)
 
@@ -120,7 +121,7 @@ def reload(own_formation = None, rival_formation = None):
     app_formations.layout = create_formation_layout()
 
 
-def create_formation_layout():
+def  create_formation_layout():
     return html.Div([
         dcc.Tabs(id='tabs', value='octs', children=[
             dcc.Tab(label=name, value=name, className='custom-tab',
@@ -135,10 +136,17 @@ def create_config_layout():
     teamdir, rivaldir = os.path.join(basedir, 'teams', teamname), os.path.join(basedir, 'teams',
                                                                                rivalname) if rivalname else None
 
-    team_dict = read_formation_for_select(teamdir, 'full_formation.csv')
-    rival_dict = read_formation_for_select(rivaldir, 'full_formation.csv')
-    columns = create_player_columns(team_dict, 'own')
-    rival_columns = create_player_columns(rival_dict, 'rival')
+    formation, rivalformation = config.get("formation", None), config.get("rival_formation", None)
+
+
+    team_dict = read_formation_for_select(teamdir, 'full_squad.csv')
+    rival_dict = read_formation_for_select(rivaldir, 'full_squad.csv')
+    if formation:
+        formation_lists = read_selected_formation(teamdir, formation)
+    if rivalformation:
+        rival_formation_lists = read_selected_formation(rivaldir, rivalformation)
+    columns = create_player_columns(team_dict, 'own', formation_lists)
+    rival_columns = create_player_columns(rival_dict, 'rival', rival_formation_lists)
     return html.Div([
         html.H1('Config'),
         html.Div(columns, className='row'),
@@ -149,7 +157,9 @@ def create_config_layout():
     ])
 
 
-def create_player_columns(team_dict, prefix='own'):
+def create_player_columns(team_dict, prefix='own', formation_lists=None):
+    if formation_lists:
+        role_dropdowns_defaults, player_dropdowns_defaults = formation_lists
     columns = []
     for index in range(1, 12):
         columns.append(html.Div([
@@ -157,12 +167,14 @@ def create_player_columns(team_dict, prefix='own'):
             dcc.Dropdown(
                 id=f'{prefix}-role{index}-dropdown',
                 options=[{'label': value, 'value': value} for value in
-                         ['GK', 'DR', 'DC', 'DL', 'WBR', 'DM', 'WBL', 'MR', 'MC', 'ML', 'AMR', 'AMC', 'AML', 'STC']]
+                         ['GK', 'DR', 'DC', 'DL', 'WBR', 'DM', 'WBL', 'MR', 'MC', 'ML', 'AMR', 'AMC', 'AML', 'STC']],
+                          value=role_dropdowns_defaults[index - 1] if role_dropdowns_defaults else None
             ),
             html.Label(f'Player {index}'),
             dcc.Dropdown(
                 id=f'{prefix}-player{index}-dropdown',
-                options=[{'label': player, 'value': uid} for uid, player in team_dict.items()]
+                options=[{'label': player, 'value': uid} for uid, player in team_dict.items()],
+                value=player_dropdowns_defaults[index - 1] if player_dropdowns_defaults else None
             )
 
         ], className='sixcolumns'))
@@ -178,6 +190,7 @@ if __name__ == '__main__':
         config = yaml.safe_load(confhandle)
 
     app_config.layout = create_config_layout()
-    app_formations.layout = create_formation_layout()
+    reload()
+    #app_formations.layout = create_formation_layout()
 
     server.run(debug=True)

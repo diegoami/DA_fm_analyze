@@ -34,7 +34,7 @@ def parse_selection(basedir):
     return df
 
 
-def read_formation_for_select(formation_dir, formation_file ='full_formation.csv'):
+def read_formation_for_select(formation_dir, formation_file ='full_squad.csv'):
     formation_full_file = os.path.join(formation_dir, formation_file)
     data = pd.read_csv(formation_full_file)
     fdata = data[['Player', 'UID']].drop_duplicates()
@@ -43,11 +43,17 @@ def read_formation_for_select(formation_dir, formation_file ='full_formation.csv
     result_dict = {k: v for k, v in zip(fdata['UID'], fdata['Player'])}
     return result_dict
 
-def read_formation(formation_dir, formation_file = 'full_formation.csv', full_formation = False, selected_role = None):
+def read_selected_formation(formation_dir, formation_file):
+    formation_full_file = os.path.join(formation_dir, formation_file)
+    data = pd.read_csv(formation_full_file)
+    formation_lists = (list(data['Position']), list(data['UID']))
+    return formation_lists
+
+def read_formation(formation_dir, formation_file = 'full_squad.csv', full_squad = False, selected_role = None):
     formation_full_file = os.path.join(formation_dir, formation_file)
     with open(formation_full_file, 'r', encoding='UTF-8') as file:
         lines = file.readlines()
-    if full_formation:
+    if full_squad:
         filtered_lines = [line.replace('#','') for line in lines]
 
     else:
@@ -63,7 +69,7 @@ def read_formation(formation_dir, formation_file = 'full_formation.csv', full_fo
     return data
 
 def save_formation(basedir, df):
-    with open(os.path.join(basedir, 'full_formation.csv'), 'w', encoding='UTF-8') as file:
+    with open(os.path.join(basedir, 'full_squad.csv'), 'w', encoding='UTF-8') as file:
         header = f"{','.join(df.columns)}\n"
         file.write(header)
 

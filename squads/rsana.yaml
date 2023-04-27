@@ -1,3 +1,4 @@
 basedir: "/Users/diego/projects/DA_fm_data/laliga/"
 team: "rsana"
-formation: "full_formation.csv"
+#formation: "full_squad.csv"
+formation: "squad_barca.csv"

@@ -14,7 +14,11 @@ if __name__ == '__main__':
     with open(args.config, 'r') as confhandle:
         config = yaml.safe_load(confhandle)
     basedir = config["basedir"]
-    team = config["team"]
-    teams_dir = os.path.join(basedir, 'teams', team)
-
-    full_df = extract_match_roles(teams_dir)
+    team = config.get("team", None)
+    if team:
+        teams_dir = os.path.join(basedir, 'teams', team)
+        full_df = extract_match_roles(teams_dir)
+    else:
+        for team in os.listdir(os.path.join(basedir, 'teams')):
+            teams_dir = os.path.join(basedir, 'teams', team)
+            full_df = extract_match_roles(teams_dir)

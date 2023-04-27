@@ -5,7 +5,7 @@ import argparse
 import yaml
 import pandas as pd
 
-from fmanalyze.aggregate.collect import create_full_formation_dfs
+from fmanalyze.aggregate.collect import create_full_squad_dfs
 import os
 
 from dash.dependencies import Input, Output, State
@@ -73,7 +73,8 @@ def reload(value = None):
     basedir, teamname, rivalname = config["basedir"], config["team"], config.get("rival", None)
     teamdir = os.path.join(basedir, 'teams', teamname)
     quantilesdir = os.path.join(basedir, 'quantiles')
-    create_full_formation_dfs(teamdir, quantilesdir, own_all_dfs, color_dfs, selected_role=value)
+    formation = config.get("formation", None)
+    create_full_squad_dfs(teamdir, quantilesdir, own_all_dfs, color_dfs, formation=None, selected_role=value)
     # Define the layout of the app
     app_squads.layout = html.Div([
         dcc.Tabs(id='tabs', value='octs', children=[
@@ -90,7 +91,7 @@ def create_config_layout():
     basedir, teamname, rivalname = config["basedir"], config["team"], config.get("rival", None)
     teamdir = os.path.join(basedir, 'teams', teamname)
 
-    team_dict = read_formation_for_select(teamdir, 'full_formation.csv')
+    team_dict = read_formation_for_select(teamdir, 'full_squad.csv')
     columns = create_role_columns()
     return html.Div([
         html.H1('Config'),

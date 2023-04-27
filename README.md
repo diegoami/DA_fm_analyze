@@ -20,12 +20,18 @@ There are two application that you can start to analyze your squad and the squad
 * `view_squad.py` to analyze your squad
 * `view_formation.py` to analyze a formation
 
+The purpose of each application is to select a list of players and show how they compare to the rest of the league in all attributes. This is done using a color schema highlighting the quantiles of each attribute.
+
 ## VIEWING YOUR SQUAD
 
-1. Create a yaml file with the name of the team you want to analyze, as an example check `teams/rsana.yml`
-2. Find the `full_formation.csv` file of your team that will be in the `teams` subdirectory of the `targetdir` you specified in the yaml file. It will contain all possible position for your squad, but all lines are commented out
-3. Make a copy of the `full_formation.csv` file and name it for instance `formation.csv`. Comment out the players you want to employ in the next match, with their correspondent role.
-4. Define your rival team in the `rival` field of the yaml file
-5. Find the `full_formation.csv` file of your rival team and execute the same operation as in the previous step
-6. Run `python3 view_squad.py -c teams/rsana.yml` to visualize the analysis for your team as a dash application
-VIEWING A FORMATION
+1. Create a yaml file with the name of the team you want to analyze, as an example check `squads/rsana.yml`
+2. Find the `full_squad.csv` file of your team that will be in the `teams` subdirectory of the `targetdir` you specified in the yaml file. It will contain all possible position for your squad, but all lines are commented out
+3. (Optional) Make a copy of the `full_squad.csv` file and name it for instance `formation.csv`. Define in the yaml file the `formation` attribute as the name to this file. 
+4. Run `python3 view_squad.py -c squads/rsana.yml` to visualize the analysis for your team - select the `squad` button to see the attributes of your squad or formation
+5. To filter your squad by position, select the `config` button and select the postion you want to filter by. Use the back button to pick another position.
+
+## VIEWING A FORMATION
+
+1. Create a yaml file containing the name of the teams whose formations you want to analyze, as an example `formations/rsana.yml`
+2. Optionally, define and create a formation file containing a subset of `full_squad.csv`, uncommented
+3. Alternatively, use the `config` button to select the players you want to analyze - the formation will be saved to other files you define in the yaml file.

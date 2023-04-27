@@ -45,8 +45,9 @@ def form_merge(ref_df, formation_df):
 #            all_dfs[key] = df[df['Position'] != 'GK']
 
 
-def create_full_formation_dfs(teamdir, quantilesdir, own_all_dfs, color_dfs, selected_role=None):
-    formation_df = read_formation(teamdir, 'full_formation.csv', full_formation=True, selected_role=selected_role)
+def create_full_squad_dfs(teamdir, quantilesdir, own_all_dfs, color_dfs, formation=None, selected_role=None):
+    formation_file = formation if formation else 'full_squad.csv'
+    formation_df = read_formation(teamdir, formation_file, full_squad=True, selected_role=selected_role)
     color_roles_dfs = create_color_roles_dfs(quantilesdir, selected_role=selected_role)
     fill_all_dfs(own_all_dfs, teamdir, formation_df, selected_role)
     fill_color_dfs(color_dfs, own_all_dfs, color_roles_dfs, selected_role)
@@ -68,10 +69,10 @@ def read_formations(teamdir, formation, rivaldir, rivalformation):
     if formation:
         formation_df = read_formation(teamdir, formation)
     else:
-        formation_df = read_formation(teamdir, full_formation=True)
+        formation_df = read_formation(teamdir, full_squad=True)
     if rivaldir is not None:
         if rivalformation is not None:
             formation_rival_df = read_formation(rivaldir, rivalformation)
         else:
-            formation_rival_df = read_formation(rivaldir, full_formation=True)
+            formation_rival_df = read_formation(rivaldir, full_squad=True)
     return formation_df, formation_rival_df
