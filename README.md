@@ -28,10 +28,13 @@ The purpose of each application is to select a list of players and show how they
 2. Find the `full_squad.csv` file of your team that will be in the `teams` subdirectory of the `targetdir` you specified in the yaml file. It will contain all possible position for your squad, but all lines are commented out
 3. (Optional) Make a copy of the `full_squad.csv` file and name it for instance `formation.csv`. Define in the yaml file the `formation` attribute as the name to this file. 
 4. Run `python3 view_squad.py -c squads/rsana.yml` to visualize the analysis for your team - select the `squad` button to see the attributes of your squad or formation
-5. To filter your squad by position, select the `config` button and select the postion you want to filter by. Use the back button to pick another position.
+5. To filter your squad by position, select the `config` button and select the position you want to filter by. Use the back button to pick another position.
+6. The `squad` button from the landing page will ead directly to your squad list, possibly filtered
 
 ## VIEWING A FORMATION
 
 1. Create a yaml file containing the name of the teams whose formations you want to analyze, as an example `formations/rsana.yml`
-2. Optionally, define and create a formation file containing a subset of `full_squad.csv`, uncommented
-3. Alternatively, use the `config` button to select the players you want to analyze - the formation will be saved to other files you define in the yaml file.
+2. Optionally, define and create a formation file containing a subset of the squad, and define the name of the file as `load_formation` and `load_rival_formation` in the yaml file. 
+3. Run `python3 view_formation.py -c formations/rsana.yml` to visualize the analysis for your team - select the `squad` button to see the attributes of your squad or formation
+4. Use the `config` button to select the players you want to analyze - the formation will be saved to the files you defined as `save_formation` and `save_rival_formation` in the yaml file
+5. In the `formation` page, you can see the attributes of the formations yous selected
