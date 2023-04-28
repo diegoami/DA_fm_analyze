@@ -70,36 +70,44 @@ def process_formation():
 
 @app_formations.callback(Output('tab-content', 'children'), [Input('tabs', 'value')])
 def render_content(tab):
-    color_df = color_dfs[f'{tab}_color']
-    df = own_all_dfs[tab]
-    style_conditions = fill_style_conditions(color_df)
+    table_names = tab_dfs[tab]
+
+    color_tables = [color_dfs[f'{table_name}_color'].drop(columns=['UID']) for table_name in table_names]
+    df_tables = [own_all_dfs[table_name].drop(columns=['UID']) for table_name in table_names]
+    style_condition_tables = [fill_style_conditions(color_table) for color_table in color_tables]
     # Set a fixed width for each column in pixels
 
 
     # Create the DataTable for df
-    table_df = create_fm_data_table(df, style_conditions, column_width=150)
+    table_dfs = [create_fm_data_table(df_table, style_condition_table) for df_table, style_condition_table in zip(df_tables, style_condition_tables)]
 
 
     if rival_all_dfs:
-        rival_df = rival_all_dfs[tab]
-        rival_color_df = rival_color_dfs[f'{tab}_color']
-        rival_style_conditions = fill_style_conditions(rival_color_df)
+        rival_df_tables = [rival_all_dfs[table_name].drop(columns=['UID']) for table_name in table_names]
+        rival_color_tables =[rival_color_dfs[f'{table_name}_color'].drop(columns=['UID']) for table_name in table_names]
+        rival_style_condition_tables = [fill_style_conditions(rival_color_table) for rival_color_table in rival_color_tables]
 
-        table_rival_df = create_fm_data_table(rival_df, rival_style_conditions)
+        table_rival_dfs = [create_fm_data_table(rival_df_table, rival_style_condition_table) for rival_df_table, rival_style_condition_table in zip(rival_df_tables, rival_style_condition_tables)]
         return html.Div([
             html.Div([
                 html.H4('Own Data'),
-                table_df
+                html.Div([
+                    *table_dfs
+                ], className='tables-container')
             ]),
             html.Div([
                 html.H4('Rival Data'),
-                table_rival_df
+                html.Div([
+                    *table_rival_dfs
+                ], className='tables-container')
             ])
         ])
     else:
         return html.Div([
             html.H4('Own Data'),
-            table_df
+            html.Div([
+                *table_dfs
+            ], className='tables-container')
         ])
 
 
@@ -120,7 +128,7 @@ def reload(own_formation = None, rival_formation = None):
     create_formation_dfs(teamdir, rivaldir, quantilesdir, formation_df, formation_rival_df,
                          own_all_dfs, color_dfs, rival_all_dfs, rival_color_dfs)
     # Define the layout of the app
-    app_formations.layout = create_formation_layout(own_all_dfs, 'octs')
+    app_formations.layout = create_formation_layout(tab_dfs, 'OCTAGON')
 
 
 def create_config_layout():
