@@ -11,7 +11,7 @@ import os
 from dash.dependencies import Input, Output, State
 
 from fmanalyze.roles.formation import read_formation_for_select
-from fmanalyze.ui.dash_helper import fill_style_conditions, create_fm_data_table
+from fmanalyze.ui.dash_helper import fill_style_conditions, create_fm_data_table, create_formation_layout
 from dash.dependencies import Input, Output
 
 
@@ -30,6 +30,11 @@ app_config = dash.Dash(__name__, server=server, url_base_pathname='/config/')
 
 own_all_dfs = {}
 color_dfs = {}
+tab_dfs = {"OCTAGON" : ['octs', 'gk_octs'],
+           "ATTRIBUTES" : ['tec', 'men', 'phys', 'goalk'],
+           "ABILITIES" : ['tecabi', 'menabi', 'physabi']}
+
+
 
 @server.route('/')
 def index():
@@ -51,18 +56,21 @@ def on_button_click(n_clicks, value):
 
 @app_squads.callback(Output('tab-content', 'children'), [Input('tabs', 'value')])
 def render_content(tab):
-    color_df = color_dfs[f'{tab}_color']
-    df = own_all_dfs[tab]
-    style_conditions = fill_style_conditions(color_df, tab)
+    table_names = tab_dfs[tab]
+    color_tables = [color_dfs[f'{table_name}_color'].drop(columns=['UID']) for table_name in table_names]
+    df_tables = [own_all_dfs[table_name].drop(columns=['UID']) for table_name in table_names]
+    style_condition_tables = [fill_style_conditions(color_table) for color_table in color_tables]
     # Set a fixed width for each column in pixels
 
 
     # Create the DataTable for df
-    table_df = create_fm_data_table(df, style_conditions)
+    table_dfs = [create_fm_data_table(df_table, style_condition_table) for df_table, style_condition_table in zip(df_tables, style_condition_tables)]
 
     return html.Div([
         html.H4('Own Data'),
-        table_df
+        html.Div([
+            *table_dfs
+        ], className='tables-container')
     ])
 
 
@@ -76,13 +84,7 @@ def reload(value = None):
     formation = config.get("formation", None)
     create_full_squad_dfs(teamdir, quantilesdir, own_all_dfs, color_dfs, formation=None, selected_role=value)
     # Define the layout of the app
-    app_squads.layout = html.Div([
-        dcc.Tabs(id='tabs', value='octs', children=[
-            dcc.Tab(label=name, value=name, className='custom-tab',
-                    selected_className='custom-tab--selected') for name in own_all_dfs.keys()
-        ]),
-        html.Div(id='tab-content')
-    ])
+    app_squads.layout = create_formation_layout(tab_dfs, 'OCTAGON')
 
 
 

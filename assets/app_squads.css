@@ -17,3 +17,24 @@
   color: white;
   background-color: #0074D9;
 }
+
+/* Set display flex for the tables container */
+.tables-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* Set display flex for the tables container */
+.tables-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+/* Set a margin and flex-basis for the DataTable */
+.tables-container .dash-table-container {
+    margin-right: 10px;  /* Adjust the value as needed */
+    min-width: 250px;    /* Adjust the value as needed */
+    max-width: 45%;      /* Adjust the value as needed */
+    flex-grow: 1;
+}

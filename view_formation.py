@@ -6,9 +6,9 @@ import yaml
 import pandas as pd
 from fmanalyze.aggregate.collect import create_formation_dfs, read_formations
 import os
-from dash.dependencies import Input, Output, State
+from dash.dependencies import State
 from fmanalyze.roles.formation import read_formation_for_select, read_selected_formation
-from fmanalyze.ui.dash_helper import fill_style_conditions, create_fm_data_table
+from fmanalyze.ui.dash_helper import fill_style_conditions, create_fm_data_table, create_formation_layout
 from dash.dependencies import Input, Output
 import dash_html_components as html
 from flask import Flask, render_template
@@ -28,6 +28,9 @@ own_all_dfs = {}
 rival_all_dfs = {}
 color_dfs = {}
 rival_color_dfs = {}
+tab_dfs = {"OCTAGON" : ['octs', 'gk_octs'],
+           "ATTRIBUTES" : ['tec', 'men', 'phys', 'goalk'],
+           "ABILITIES" : ['tecabi', 'menabi', 'physabi']}
 
 @server.route('/')
 def index():
@@ -69,18 +72,18 @@ def process_formation():
 def render_content(tab):
     color_df = color_dfs[f'{tab}_color']
     df = own_all_dfs[tab]
-    style_conditions = fill_style_conditions(color_df, tab)
+    style_conditions = fill_style_conditions(color_df)
     # Set a fixed width for each column in pixels
 
 
     # Create the DataTable for df
-    table_df = create_fm_data_table(df, style_conditions)
+    table_df = create_fm_data_table(df, style_conditions, column_width=150)
 
 
     if rival_all_dfs:
         rival_df = rival_all_dfs[tab]
         rival_color_df = rival_color_dfs[f'{tab}_color']
-        rival_style_conditions = fill_style_conditions(rival_color_df, tab)
+        rival_style_conditions = fill_style_conditions(rival_color_df)
 
         table_rival_df = create_fm_data_table(rival_df, rival_style_conditions)
         return html.Div([
@@ -117,17 +120,7 @@ def reload(own_formation = None, rival_formation = None):
     create_formation_dfs(teamdir, rivaldir, quantilesdir, formation_df, formation_rival_df,
                          own_all_dfs, color_dfs, rival_all_dfs, rival_color_dfs)
     # Define the layout of the app
-    app_formations.layout = create_formation_layout()
-
-
-def  create_formation_layout():
-    return html.Div([
-        dcc.Tabs(id='tabs', value='octs', children=[
-            dcc.Tab(label=name, value=name, className='custom-tab',
-                    selected_className='custom-tab--selected') for name in own_all_dfs.keys()
-        ]),
-        html.Div(id='tab-content')
-    ])
+    app_formations.layout = create_formation_layout(own_all_dfs, 'octs')
 
 
 def create_config_layout():
