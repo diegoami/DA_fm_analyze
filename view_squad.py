@@ -3,18 +3,12 @@ from dash import html
 from dash import dcc
 import argparse
 import yaml
-import pandas as pd
-
 from fmanalyze.aggregate.collect import create_full_squad_dfs
 import os
-
 from dash.dependencies import Input, Output, State
-
 from fmanalyze.roles.formation import read_formation_for_select
 from fmanalyze.ui.dash_helper import fill_style_conditions, create_fm_data_table, create_formation_layout
 from dash.dependencies import Input, Output
-
-
 import dash_html_components as html
 from flask import Flask, render_template
 
@@ -27,20 +21,15 @@ app_squads = dash.Dash(__name__, server=server, url_base_pathname='/squads/')
 app_config = dash.Dash(__name__, server=server, url_base_pathname='/config/')
 
 
-
 own_all_dfs = {}
 color_dfs = {}
 tab_dfs = {"OCTAGON" : ['octs', 'gk_octs'],
            "ATTRIBUTES" : ['tec', 'men', 'phys', 'goalk'],
            "ABILITIES" : ['tecabi', 'menabi', 'physabi']}
 
-
-
 @server.route('/')
 def index():
     return render_template('squad_index.html')
-
-
 
 @app_config.callback(
     Output('redirect', 'pathname'),
