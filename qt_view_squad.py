@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QTableWidget,
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
 from fmanalyze.aggregate.collect import create_full_squad_dfs
-from fmanalyze.roles.formation import read_formation_for_select
+
 color_map = {-2: 'red', -1: 'orange', 0: 'yellow', 1: 'lightgreen', 2: 'darkgreen'}
 own_all_dfs = {}
 color_dfs = {}
@@ -53,7 +53,7 @@ def create_formation_layout(dfs, value):
 
     for tab_name, table_names in dfs.items():
         tab = QWidget()
-        tab_layout = QVBoxLayout(tab)
+        tab_layout = QHBoxLayout(tab)
 
         for table_name in table_names:
             table = create_fm_data_table(own_all_dfs[table_name].drop(columns=['UID']), fill_style_conditions(color_dfs[f'{table_name}_color'].drop(columns=['UID'])))
@@ -72,7 +72,6 @@ class DashToPyQtApp(QMainWindow):
         self.title = "Dash to PyQt App"
         self.init_ui()
         self.reload()
-        self.init_tabs()
         self.init_buttons()
 
 
@@ -105,18 +104,25 @@ class DashToPyQtApp(QMainWindow):
         self.submit_button.clicked.connect(self.on_submit_button_click)
         self.button_layout.addWidget(self.submit_button)
 
+        self.reset_button = QPushButton("Reset", self)
+        self.reset_button.clicked.connect(self.on_reset_button_click)
+        self.button_layout.addWidget(self.reset_button)
+
         self.main_layout.addLayout(self.button_layout)
 
     def on_submit_button_click(self):
         role_value = self.role_dropdown.currentText()
         self.reload(role_value)
 
+    def on_reset_button_click(self):
+        self.reload()
+
     def reload(self, value=None):
         basedir, teamname, rivalname = self.config["basedir"], self.config["team"], self.config.get("rival", None)
         teamdir = os.path.join(basedir, 'teams', teamname)
         quantilesdir = os.path.join(basedir, 'quantiles')
         formation = self.config.get("formation", None)
-        create_full_squad_dfs(teamdir, quantilesdir, own_all_dfs, color_dfs, formation=None, selected_role=value)
+        create_full_squad_dfs(teamdir, quantilesdir, own_all_dfs, color_dfs, formation=formation, selected_role=value)
         # Remove the old tabs and create new ones
         if self.tabs:
             self.main_layout.removeWidget(self.tabs)
