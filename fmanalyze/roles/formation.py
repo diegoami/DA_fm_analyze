@@ -33,16 +33,17 @@ def parse_selection(basedir):
     df.drop(columns=["Name"], inplace=True, axis=1)
     return df
 
-
-def read_formation_for_select(formation_dir, formation_file ='full_squad.csv'):
-    formation_full_file = os.path.join(formation_dir, formation_file)
-    data = pd.read_csv(formation_full_file)
-    fdata = data[['Player', 'UID']].drop_duplicates()
+def convert_formation_to_dict(fdata):
     fdata['Surname'] = fdata['Player'].apply(lambda name: name.split(' ')[-1])
     fdata = fdata.sort_values(by=['Surname']).drop(columns=['Surname'])
     result_dict = {k: v for k, v in zip(fdata['UID'], fdata['Player'])}
     return result_dict
 
+def read_formation_for_select(formation_dir, formation_file ='full_squad.csv'):
+    formation_full_file = os.path.join(formation_dir, formation_file)
+    data = pd.read_csv(formation_full_file)
+    fdata = data[['Player', 'UID']].drop_duplicates()
+    return convert_formation_to_dict(fdata)
 def read_selected_formation(formation_dir, formation_file):
     formation_full_file = os.path.join(formation_dir, formation_file)
     data = pd.read_csv(formation_full_file)

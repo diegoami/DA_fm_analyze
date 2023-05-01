@@ -1,6 +1,7 @@
 import argparse
 import yaml
-from fmanalyze.roles.formation import read_formation_for_select, read_selected_formation, read_formation
+from fmanalyze.roles.formation import read_formation_for_select, read_selected_formation, read_formation, \
+    convert_formation_to_dict
 import sys
 
 from fmanalyze.aggregate.collect import create_formation_dfs, read_formations
@@ -108,7 +109,7 @@ class DashToPyQtApp(QMainWindow):
         self.splitter.setSizes([400, 400, 200])
 
     def toggle_combobox_panel(self):
-        combobox_panel = self.splitter.widget(0)  # Assuming the combobox panel is at index 2
+        combobox_panel = self.splitter.widget(2)  # Assuming the combobox panel is at index 2
         combobox_panel.setVisible(not combobox_panel.isVisible())
     def init_ui(self):
         self.setWindowTitle(self.title)
@@ -126,7 +127,7 @@ class DashToPyQtApp(QMainWindow):
         self.splitter = QSplitter(Qt.Vertical)  # Create a vertical splitter
         self.main_layout.addWidget(self.splitter)
 
-    def on_role_combobox_changed(self, index):
+    def on_own_role_combobox_changed(self, index):
         config = self.config
         basedir, teamname, rivalname = config["basedir"], config["team"], config.get("rival", None)
         teamdir, rivaldir = os.path.join(basedir, 'teams', teamname), os.path.join(basedir, 'teams',
@@ -136,11 +137,28 @@ class DashToPyQtApp(QMainWindow):
         player_combobox = role_combobox.property("associatedPlayerCombobox")
 
         selected_role = role_combobox.currentText()
-        new_players = read_formation(teamdir, full_squad=True, selected_role=selected_role)
-
+        new_players_data = read_formation(teamdir, full_squad=True, selected_role=selected_role)
+        new_players = convert_formation_to_dict(new_players_data)
         player_combobox.clear()
         for uid, player in new_players.items():
             player_combobox.addItem(player, uid)
+
+    def on_rival_role_combobox_changed(self, index):
+        config = self.config
+        basedir, teamname, rivalname = config["basedir"], config["team"], config.get("rival", None)
+        teamdir, rivaldir = os.path.join(basedir, 'teams', teamname), os.path.join(basedir, 'teams',
+                                                                                   rivalname) if rivalname else None
+
+        role_combobox = self.sender()
+        player_combobox = role_combobox.property("associatedPlayerCombobox")
+
+        selected_role = role_combobox.currentText()
+        new_players_data = read_formation(rivaldir, full_squad=True, selected_role=selected_role)
+        new_players = convert_formation_to_dict(new_players_data)
+        player_combobox.clear()
+        for uid, player in new_players.items():
+            player_combobox.addItem(player, uid)
+
 
     def create_combobox_panel(self, config):
         combobox_panel = QWidget()
@@ -208,7 +226,7 @@ class DashToPyQtApp(QMainWindow):
             role_combobox.addItems(
                 ['GK', 'DR', 'DC', 'DL', 'WBR', 'DM', 'WBL', 'MR', 'MC', 'ML', 'AMR', 'AMC', 'AML', 'STC'])
             role_combobox.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)  # Set the size policy to fixed
-
+            role_combobox.setCurrentIndex(-1)
             column_layout.addWidget(role_combobox)
 
             player_label = QLabel(f'Player {index}')
@@ -216,14 +234,16 @@ class DashToPyQtApp(QMainWindow):
 
             player_combobox = QComboBox()
             player_combobox.setObjectName(f'{prefix}-player{index}-dropdown')
-            for uid, player in team_dict.items():
-                player_combobox.addItem(player, uid)
+            #for uid, player in team_dict.items():
+            #    player_combobox.addItem(player, uid)
             player_combobox.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)  # Set the size policy to fixed
+            player_combobox.setMinimumWidth(150)
             column_layout.addWidget(player_combobox)
-            role_combobox.currentIndexChanged.connect(self.on_role_combobox_changed)
+            if prefix == 'own':
+                role_combobox.currentIndexChanged.connect(self.on_own_role_combobox_changed)
+            else:
+                role_combobox.currentIndexChanged.connect(self.on_rival_role_combobox_changed)
             role_combobox.setProperty("associatedPlayerCombobox", player_combobox)
-
-
             columns.append(column_layout)
         return columns
 
