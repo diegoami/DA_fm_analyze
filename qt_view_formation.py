@@ -1,6 +1,6 @@
 import argparse
 import yaml
-from fmanalyze.roles.formation import read_formation_for_select, read_selected_formation
+from fmanalyze.roles.formation import read_formation_for_select, read_selected_formation, read_formation
 import sys
 
 from fmanalyze.aggregate.collect import create_formation_dfs, read_formations
@@ -126,7 +126,21 @@ class DashToPyQtApp(QMainWindow):
         self.splitter = QSplitter(Qt.Vertical)  # Create a vertical splitter
         self.main_layout.addWidget(self.splitter)
 
+    def on_role_combobox_changed(self, index):
+        config = self.config
+        basedir, teamname, rivalname = config["basedir"], config["team"], config.get("rival", None)
+        teamdir, rivaldir = os.path.join(basedir, 'teams', teamname), os.path.join(basedir, 'teams',
+                                                                                   rivalname) if rivalname else None
 
+        role_combobox = self.sender()
+        player_combobox = role_combobox.property("associatedPlayerCombobox")
+
+        selected_role = role_combobox.currentText()
+        new_players = read_formation(teamdir, full_squad=True, selected_role=selected_role)
+
+        player_combobox.clear()
+        for uid, player in new_players.items():
+            player_combobox.addItem(player, uid)
 
     def create_combobox_panel(self, config):
         combobox_panel = QWidget()
@@ -193,8 +207,6 @@ class DashToPyQtApp(QMainWindow):
             role_combobox.setObjectName(f'{prefix}-role{index}-dropdown')
             role_combobox.addItems(
                 ['GK', 'DR', 'DC', 'DL', 'WBR', 'DM', 'WBL', 'MR', 'MC', 'ML', 'AMR', 'AMC', 'AML', 'STC'])
-            #role_combobox.setMaxVisibleItems(4)  # Limit the number of visible items
-            #role_combobox.setMinimumContentsLength(4)  # Set the minimum content length
             role_combobox.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)  # Set the size policy to fixed
 
             column_layout.addWidget(role_combobox)
@@ -207,10 +219,10 @@ class DashToPyQtApp(QMainWindow):
             for uid, player in team_dict.items():
                 player_combobox.addItem(player, uid)
             player_combobox.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)  # Set the size policy to fixed
-
-#            player_combobox.setMaxVisibleItems(4)  # Limit the number of visible items
-#            player_combobox.setMinimumContentsLength(4)  # Set the minimum content length
             column_layout.addWidget(player_combobox)
+            role_combobox.currentIndexChanged.connect(self.on_role_combobox_changed)
+            role_combobox.setProperty("associatedPlayerCombobox", player_combobox)
+
 
             columns.append(column_layout)
         return columns
@@ -250,8 +262,6 @@ class DashToPyQtApp(QMainWindow):
         self.tabs.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  # Set the size policy to Expanding
         self.rivaltabs.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  # Set the size policy to Expanding
 
-        #self.main_layout.insertWidget(0, self.tabs)
-        #self.main_layout.insertWidget(0, self.rivaltabs)
         self.tabs, self.rivaltabs = create_formation_layout(tab_dfs, 'OCTAGON')
 
         if self.tabs:
