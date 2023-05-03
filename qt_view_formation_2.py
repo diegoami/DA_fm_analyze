@@ -1,77 +1,17 @@
 import argparse
 import yaml
-from fmanalyze.roles.formation import read_formation_for_select, read_selected_formation, read_formation, \
-    convert_formation_to_dict
-import sys
-
-from fmanalyze.aggregate.collect import create_formation_dfs, read_formations
 import os
+import sys
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout,
+                             QWidget, QLabel, QComboBox, QPushButton, QSizePolicy, QSplitter, QToolBar,
+                             QMenuBar, QAction)
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, \
-    QLabel, QComboBox, QPushButton, QHBoxLayout, QSizePolicy, QSplitter
+from fmanalyze.roles.formation import (read_formation_for_select, read_formation,
+                                       convert_formation_to_dict, create_formation_df)
+from fmanalyze.aggregate.collect import create_formation_dfs, read_formations
 from PyQt5.QtWidgets import QGridLayout
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor
-import pandas as pd
-
-color_map = {-2: 'red', -1: 'orange', 0: 'yellow', 1: 'lightgreen', 2: 'darkgreen'}
-
-def fill_style_conditions(color_df):
-    style_conditions = []
-    for index, row in color_df.iterrows():
-        for icol, col in enumerate(color_df.columns):
-            if col not in ['Player', 'UID', 'Position']:
-                content = row[col]
-                style_conditions.append({
-                    'row_index': index,
-                    'column_id': col,
-                    'backgroundColor': color_map[content],
-                })
-    return style_conditions
-
-
-def create_fm_data_table(df, style_conditions, column_width=30):
-    table = QTableWidget(df.shape[0], df.shape[1])
-
-    table.setHorizontalHeaderLabels(df.columns)
-    table.setVerticalHeaderLabels(df.index.astype(str))
-
-    for index, row in df.iterrows():
-        for icol, col in enumerate(df.columns):
-            item = QTableWidgetItem(str(row[col]))
-            item.setTextAlignment(Qt.AlignCenter)
-
-            for cond in style_conditions:
-                if cond['row_index'] == index and cond['column_id'] == col:
-                    item.setBackground(QColor(cond['backgroundColor']))
-
-            table.setItem(index, icol, item)
-
-    table.resizeColumnsToContents()
-    return table
-
-
-def create_formation_layout(dfs, value):
-    tab_widget = QTabWidget()
-    rival_tab_widget = QTabWidget()
-    for tab_name, table_names in dfs.items():
-        tab = QWidget()
-        tab_layout = QHBoxLayout(tab)
-        rival_tab = QWidget()
-        rival_tab_layout = QHBoxLayout(rival_tab)
-        for table_name in table_names:
-            style_conditions = fill_style_conditions(color_dfs[f'{table_name}_color'].drop(columns=['UID']))
-            table = create_fm_data_table(own_all_dfs[table_name].drop(columns=['UID']),style_conditions )
-            tab_layout.addWidget(table)
-            tab_widget.addTab(tab, tab_name)
-
-            rival_style_conditions = fill_style_conditions(rival_color_dfs[f'{table_name}_color'].drop(columns=['UID']))
-            rival_table = create_fm_data_table(rival_all_dfs[table_name].drop(columns=['UID']), rival_style_conditions)
-            rival_tab_layout.addWidget(rival_table)
-            rival_tab_widget.addTab(rival_tab, tab_name)
-
-
-    return tab_widget, rival_tab_widget
+from fmanalyze.ui.qt_helper import (create_formation_layout)
 
 config = None
 
@@ -85,22 +25,16 @@ tab_dfs = {"OCTAGON" : ['octs', 'gk_octs'],
            "ABILITIES" : ['tecabi', 'menabi', 'physabi']}
 
 
-
-def create_formation_df(positions, uids):
-    df = pd.DataFrame(columns=['Position', 'UID'])
-    df['Position'] = positions
-    df['UID'] = uids
-    df.dropna(inplace=True)
-    df['UID'] = df['UID'].astype('int64')
-    return df
-
-
 class DashToPyQtApp(QMainWindow):
     def __init__(self, config):
         super().__init__()
         self.tabs = None
         self.rivaltabs = None
         self.config = config
+        self.basedir, self.teamname = config["basedir"], config["team"]
+        self.teamdir = os.path.join(self.basedir, 'teams', self.teamname)
+        self.rivalname = config["rival"]
+        self.rivaldir = os.path.join(self.basedir, 'teams', self.rivalname)
         self.title = "Dash to PyQt App"
         self.init_ui()
         self.reload(config)
@@ -112,15 +46,6 @@ class DashToPyQtApp(QMainWindow):
         combobox_panel = self.splitter.widget(2)  # Assuming the combobox panel is at index 2
         combobox_panel.setVisible(not combobox_panel.isVisible())
 
-    def load_formation(self, config):
-        basedir, teamname, rivalname = config["basedir"], config["team"], config.get("rival", None)
-        teamdir, rivaldir = os.path.join(basedir, 'teams', teamname), os.path.join(basedir, 'teams',
-                                                                                   rivalname) if rivalname else None
-        load_formation, load_rival_formation = config.get("load_formation", None), config.get("load_rival_formation",
-                                                                                            None)
-        formation_df, formation_rival_df = read_formations(teamdir, load_formation, rivaldir, load_rival_formation)
-
-
     def init_ui(self):
         self.setWindowTitle(self.title)
         self.setGeometry(100, 100, 1200, 800)
@@ -129,13 +54,25 @@ class DashToPyQtApp(QMainWindow):
         self.setCentralWidget(self.main_widget)
 
         self.main_layout = QVBoxLayout(self.main_widget)
-        self.toggle_combobox_panel_button = QPushButton("Toggle Combobox Panel")
-        self.toggle_combobox_panel_button.clicked.connect(self.toggle_combobox_panel)
-        self.main_layout.addWidget(self.toggle_combobox_panel_button)
 
+        # Create menubar
+        menubar = QMenuBar(self)
+        self.setMenuBar(menubar)
+        view_menu = menubar.addMenu("View")
+
+        # Create toolbar
+        toolbar = QToolBar("Main Toolbar")
+        self.addToolBar(toolbar)
+
+        # Create actions for menubar and toolbar
+        toggle_combobox_panel_action = QAction("Toggle Combobox Panel", self)
+        toggle_combobox_panel_action.triggered.connect(self.toggle_combobox_panel)
+        view_menu.addAction(toggle_combobox_panel_action)
+        toolbar.addAction(toggle_combobox_panel_action)
 
         self.splitter = QSplitter(Qt.Vertical)  # Create a vertical splitter
         self.main_layout.addWidget(self.splitter)
+
 
     def update_player_combobox(self, combobox_dir):
         role_combobox = self.sender()
@@ -149,37 +86,18 @@ class DashToPyQtApp(QMainWindow):
             player_combobox.addItem(player, uid)
 
     def on_own_role_combobox_changed(self):
-        config = self.config
-        basedir, teamname = config["basedir"], config["team"]
-        teamdir = os.path.join(basedir, 'teams', teamname)
-        self.update_player_combobox(teamdir)
+        self.update_player_combobox(self.teamdir)
 
     def on_rival_role_combobox_changed(self):
-        config = self.config
-        basedir, rivalname = config["basedir"], config.get("rival", None)
-        if rivalname:
-            rivaldir = os.path.join(basedir, 'teams', rivalname)
-            self.update_player_combobox(rivaldir)
+        self.update_player_combobox(self.rivaldir)
 
     def create_combobox_panel(self, config):
         combobox_panel = QWidget()
         combobox_layout = QVBoxLayout(combobox_panel)
-        basedir, teamname, rivalname = config["basedir"], config["team"], config.get("rival", None)
-        teamdir, rivaldir = os.path.join(basedir, 'teams', teamname), os.path.join(basedir, 'teams',
-                                                                                   rivalname) if rivalname else None
 
-        load_formation, load_rival_formation = config.get("load_formation", None), config.get("load_rival_formation",
-                                                                                              None)
-        save_formation, save_rival_formation = config.get("save_formation", None), config.get("save_rival_formation",
-                                                                                              None)
+        team_columns = self.create_player_columns('own')
+        rival_columns = self.create_player_columns('rival')
 
-        team_dict = read_formation_for_select(teamdir, 'full_squad.csv')
-        rival_dict = read_formation_for_select(rivaldir, 'full_squad.csv')
-
-        team_columns = self.create_player_columns(team_dict, 'own')
-        rival_columns = self.create_player_columns(rival_dict, 'rival')
-
-        # Create grid layouts for team and rival comboboxes
         team_grid_layout = QGridLayout()
         rival_grid_layout = QGridLayout()
 
@@ -193,19 +111,19 @@ class DashToPyQtApp(QMainWindow):
             column_widget.setLayout(column)
             team_grid_layout.addWidget(column_widget, i // grid_columns, i % grid_columns)
 
+        team_grid_layout.addWidget(self.create_files_widget(), 3, 2)
         # Add rival columns to the rival grid layout
         for i, column in enumerate(rival_columns):
             column_widget = QWidget()
             column_widget.setLayout(column)
             rival_grid_layout.addWidget(column_widget, i // grid_columns, i % grid_columns)
+        team_grid_layout.addWidget(self.create_files_widget(), 3, 2)
 
         # Add grid layouts to the main layout
         combobox_layout.addWidget(QLabel('Config'))
-        combobox_layout.addWidget(QLabel(f'Loaded from {load_formation}, saving to {save_formation}'))
         combobox_layout.addLayout(team_grid_layout)
 
         combobox_layout.addWidget(QLabel('Rival Config'))
-        combobox_layout.addWidget(QLabel(f'Loaded from {load_rival_formation}, saving to {save_rival_formation}'))
         combobox_layout.addLayout(rival_grid_layout)
 
         submit_button = QPushButton('Submit')
@@ -213,7 +131,27 @@ class DashToPyQtApp(QMainWindow):
         combobox_layout.addWidget(submit_button)
 
         return combobox_panel
-    def create_player_columns(self, team_dict, prefix='own'):
+
+    def on_load_button_clicked(self):
+        pass
+
+    def on_save_button_clicked(self):
+        pass
+
+    def create_files_widget(self, which_one='own'):
+        files_widget = QWidget()
+        column_layout = QVBoxLayout()
+        load_button = QPushButton('Load')
+        load_button.clicked.connect(self.on_load_button_clicked)
+        save_button = QPushButton('Save')
+        load_button.clicked.connect(self.on_save_button_clicked)
+
+        column_layout.addWidget(load_button)
+        column_layout.addWidget(save_button)
+        files_widget.setLayout(column_layout)
+        return files_widget
+
+    def create_player_columns(self, prefix='own'):
 
         columns = []
         for index in range(1, 12):
@@ -235,8 +173,6 @@ class DashToPyQtApp(QMainWindow):
 
             player_combobox = QComboBox()
             player_combobox.setObjectName(f'{prefix}-player{index}-dropdown')
-            #for uid, player in team_dict.items():
-            #    player_combobox.addItem(player, uid)
             player_combobox.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)  # Set the size policy to fixed
             player_combobox.setMinimumWidth(150)
             column_layout.addWidget(player_combobox)
@@ -250,22 +186,19 @@ class DashToPyQtApp(QMainWindow):
 
 
     def reload(self, config, own_formation=None, rival_formation=None):
-        basedir, teamname, rivalname = config["basedir"], config["team"], config.get("rival", None)
-        teamdir, rivaldir = os.path.join(basedir, 'teams', teamname), os.path.join(basedir, 'teams',
-                                                                                   rivalname) if rivalname else None
-        quantilesdir = os.path.join(basedir, 'quantiles')
+        quantilesdir = os.path.join(self.basedir, 'quantiles')
         load_formation, load_rival_formation = config.get("load_formation", None), config.get("load_rival_formation",
                                                                                               None)
         save_formation, save_rival_formation = config.get("save_formation", 'formation_current.csv'), config.get(
             'save_rival_formation', 'formation_current.csv')
         if own_formation is not None and rival_formation is not None:
             formation_df, formation_rival_df = own_formation, rival_formation
-            own_formation.to_csv(os.path.join(teamdir, save_formation), index=False)
-            rival_formation.to_csv(os.path.join(rivaldir, save_rival_formation), index=False)
+            own_formation.to_csv(os.path.join(self.teamdir, save_formation), index=False)
+            rival_formation.to_csv(os.path.join(self.rivaldir, save_rival_formation), index=False)
         else:
-            formation_df, formation_rival_df = read_formations(teamdir, load_formation, rivaldir, load_rival_formation)
+            formation_df, formation_rival_df = read_formations(self.teamdir, load_formation, self.rivaldir, load_rival_formation)
 
-        create_formation_dfs(teamdir, rivaldir, quantilesdir, formation_df, formation_rival_df,
+        create_formation_dfs(self.teamdir, self.rivaldir, quantilesdir, formation_df, formation_rival_df,
                              own_all_dfs, color_dfs, rival_all_dfs, rival_color_dfs)
         # Define the layout of the app
         if self.tabs:
@@ -279,7 +212,7 @@ class DashToPyQtApp(QMainWindow):
             self.rivaltabs = None
 
 
-        self.tabs, self.rivaltabs = create_formation_layout(tab_dfs, 'OCTAGON')
+        self.tabs, self.rivaltabs = create_formation_layout(tab_dfs, 'OCTAGON', color_dfs, own_all_dfs, rival_all_dfs, rival_color_dfs)
 
         self.tabs.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  # Set the size policy to Expanding
         self.rivaltabs.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  # Set the size policy to Expanding

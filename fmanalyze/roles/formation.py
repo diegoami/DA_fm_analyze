@@ -78,3 +78,12 @@ def save_formation(basedir, df):
         for index, row in df.iterrows():
             formatted_row = f"#{','.join(row.astype(str))}\n"
             file.write(formatted_row)
+
+
+def create_formation_df(positions, uids):
+    df = pd.DataFrame(columns=['Position', 'UID'])
+    df['Position'] = positions
+    df['UID'] = uids
+    df.dropna(inplace=True)
+    df['UID'] = df['UID'].astype('int64')
+    return df
