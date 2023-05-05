@@ -35,10 +35,16 @@ class DashToPyQtApp(QMainWindow):
         self.teamdir = os.path.join(self.basedir, 'teams', self.teamname)
         self.rivalname = config["rival"]
         self.rivaldir = os.path.join(self.basedir, 'teams', self.rivalname)
+        self.quantilesdir = os.path.join(self.basedir, 'quantiles')
+        self.load_formation, self.load_rival_formation = config.get("load_formation", None), config.get("load_rival_formation",
+                                                                                              None)
+        self.save_formation, self.save_rival_formation = config.get("save_formation", 'formation_current.csv'), config.get(
+            'save_rival_formation', 'formation_current.csv')
+
         self.title = "Dash to PyQt App"
         self.init_ui()
         self.reload(config)
-        self.init_comboboxes(config)
+        self.init_comboboxes()
 
         self.splitter.setSizes([400, 400, 200])
 
@@ -74,16 +80,26 @@ class DashToPyQtApp(QMainWindow):
         self.main_layout.addWidget(self.splitter)
 
 
-    def update_player_combobox(self, combobox_dir):
-        role_combobox = self.sender()
-        player_combobox = role_combobox.property("associatedPlayerCombobox")
-
+    def do_selection(self, combobox_dir, role_combobox, player_combobox, target_uid):
         selected_role = role_combobox.currentText()
         new_players_data = read_formation(combobox_dir, full_squad=True, selected_role=selected_role)
         new_players = convert_formation_to_dict(new_players_data)
         player_combobox.clear()
-        for uid, player in new_players.items():
+
+        target_index = -1
+        for index, (uid, player) in enumerate(new_players.items()):
             player_combobox.addItem(player, uid)
+            if uid == target_uid:
+                target_index = index
+
+        if target_index != -1:
+            player_combobox.setCurrentIndex(target_index)
+
+
+    def update_player_combobox(self, combobox_dir, target_uid=None):
+        role_combobox = self.sender()
+        player_combobox = role_combobox.property("associatedPlayerCombobox")
+        self.do_selection(role_combobox, combobox_dir, player_combobox, target_uid)
 
     def on_own_role_combobox_changed(self):
         self.update_player_combobox(self.teamdir)
@@ -91,12 +107,13 @@ class DashToPyQtApp(QMainWindow):
     def on_rival_role_combobox_changed(self):
         self.update_player_combobox(self.rivaldir)
 
-    def create_combobox_panel(self, config):
+    def create_combobox_panel(self):
+
         combobox_panel = QWidget()
         combobox_layout = QVBoxLayout(combobox_panel)
 
-        team_columns = self.create_player_columns('own')
-        rival_columns = self.create_player_columns('rival')
+        team_columns = self.create_player_columns('own', self.formation_df)
+        rival_columns = self.create_player_columns('rival', self.formation_rival_df)
 
         team_grid_layout = QGridLayout()
         rival_grid_layout = QGridLayout()
@@ -111,13 +128,13 @@ class DashToPyQtApp(QMainWindow):
             column_widget.setLayout(column)
             team_grid_layout.addWidget(column_widget, i // grid_columns, i % grid_columns)
 
-        team_grid_layout.addWidget(self.create_files_widget(), 3, 2)
+        team_grid_layout.addWidget(self.create_files_widget('own'), 3, 2)
         # Add rival columns to the rival grid layout
         for i, column in enumerate(rival_columns):
             column_widget = QWidget()
             column_widget.setLayout(column)
             rival_grid_layout.addWidget(column_widget, i // grid_columns, i % grid_columns)
-        team_grid_layout.addWidget(self.create_files_widget(), 3, 2)
+        rival_grid_layout.addWidget(self.create_files_widget('rival'), 3, 2)
 
         # Add grid layouts to the main layout
         combobox_layout.addWidget(QLabel('Config'))
@@ -151,10 +168,13 @@ class DashToPyQtApp(QMainWindow):
         files_widget.setLayout(column_layout)
         return files_widget
 
-    def create_player_columns(self, prefix='own'):
+    def create_player_columns(self, prefix, default_df):
 
         columns = []
+        form_exists = len(default_df) == 11
+
         for index in range(1, 12):
+
             column_layout = QVBoxLayout()
 
             role_label = QLabel(f'Role {index}')
@@ -176,29 +196,30 @@ class DashToPyQtApp(QMainWindow):
             player_combobox.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)  # Set the size policy to fixed
             player_combobox.setMinimumWidth(150)
             column_layout.addWidget(player_combobox)
+            columns.append(column_layout)
+            if form_exists:
+                position, uid = self.formation_df['Position'][index - 1], self.formation_df['UID'][index - 1]
+                role_combobox.setCurrentText(position)
+                combobox_dir = self.teamdir if prefix == 'own' else self.rivaldir
+                self.do_selection(combobox_dir, role_combobox, player_combobox, uid)
             if prefix == 'own':
                 role_combobox.currentIndexChanged.connect(self.on_own_role_combobox_changed)
             else:
                 role_combobox.currentIndexChanged.connect(self.on_rival_role_combobox_changed)
             role_combobox.setProperty("associatedPlayerCombobox", player_combobox)
-            columns.append(column_layout)
+
         return columns
 
 
-    def reload(self, config, own_formation=None, rival_formation=None):
-        quantilesdir = os.path.join(self.basedir, 'quantiles')
-        load_formation, load_rival_formation = config.get("load_formation", None), config.get("load_rival_formation",
-                                                                                              None)
-        save_formation, save_rival_formation = config.get("save_formation", 'formation_current.csv'), config.get(
-            'save_rival_formation', 'formation_current.csv')
+    def reload(self, own_formation=None, rival_formation=None):
         if own_formation is not None and rival_formation is not None:
-            formation_df, formation_rival_df = own_formation, rival_formation
-            own_formation.to_csv(os.path.join(self.teamdir, save_formation), index=False)
-            rival_formation.to_csv(os.path.join(self.rivaldir, save_rival_formation), index=False)
+            self.formation_df, self.formation_rival_df = own_formation, rival_formation
+            own_formation.to_csv(os.path.join(self.teamdir, self.save_formation), index=False)
+            rival_formation.to_csv(os.path.join(self.rivaldir, self.save_rival_formation), index=False)
         else:
-            formation_df, formation_rival_df = read_formations(self.teamdir, load_formation, self.rivaldir, load_rival_formation)
+            self.formation_df, self.formation_rival_df = read_formations(self.teamdir, self.load_formation, self.rivaldir, self.load_rival_formation)
 
-        create_formation_dfs(self.teamdir, self.rivaldir, quantilesdir, formation_df, formation_rival_df,
+        create_formation_dfs(self.teamdir, self.rivaldir, self.quantilesdir, self.formation_df, self.formation_rival_df,
                              own_all_dfs, color_dfs, rival_all_dfs, rival_color_dfs)
         # Define the layout of the app
         if self.tabs:
@@ -222,8 +243,8 @@ class DashToPyQtApp(QMainWindow):
         if self.tabs:
             self.splitter.insertWidget(0, self.tabs)
 
-    def init_comboboxes(self, config):
-        combobox_panel = self.create_combobox_panel(config)
+    def init_comboboxes(self):
+        combobox_panel = self.create_combobox_panel()
         self.splitter.addWidget(combobox_panel)  # Add the combobox panel to the splitter
 
     def on_submit_button_clicked(self):
@@ -249,7 +270,7 @@ class DashToPyQtApp(QMainWindow):
         own_formation.dropna(inplace=True)
         rival_formation.dropna(inplace=True)
 
-        self.reload(self.config, own_formation, rival_formation)
+        self.reload(own_formation, rival_formation)
 
 def main():
     parser = argparse.ArgumentParser()
